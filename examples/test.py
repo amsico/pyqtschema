@@ -3,7 +3,7 @@ from json import dumps
 
 from PyQt5 import QtWidgets
 
-from qt_jsonschema_form import WidgetBuilder
+from pyqtschema.form import WidgetBuilder
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
