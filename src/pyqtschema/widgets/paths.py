@@ -5,8 +5,8 @@ from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
 
 class FilepathSchemaWidget(SchemaWidgetMixin, QWidget):
 
-    def __init__(self, schema: dict, ui_schema: dict, widget_builder: 'WidgetBuilder'):
-        super().__init__(schema, ui_schema, widget_builder)
+    def __init__(self, schema: dict, ui_schema: dict, widget_builder: 'WidgetBuilder', *args, **kwargs):
+        super().__init__(schema, ui_schema, widget_builder, *args, **kwargs)
 
         layout = QHBoxLayout()
         self.setLayout(layout)

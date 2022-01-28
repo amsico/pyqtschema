@@ -19,6 +19,8 @@ class TextSchemaWidget(SchemaWidgetMixin, QLineEdit):
 
 
 class TextAreaSchemaWidget(SchemaWidgetMixin, QTextEdit):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     @state_property
     def state(self) -> str:

@@ -34,8 +34,9 @@ class SpinDoubleSchemaWidget(SchemaWidgetMixin, QDoubleSpinBox):
 
 class IntegerRangeSchemaWidget(SchemaWidgetMixin, QSlider):
 
-    def __init__(self, schema: dict, ui_schema: dict, widget_builder: 'WidgetBuilder'):
-        super().__init__(schema, ui_schema, widget_builder, orientation=Qt.Horizontal)
+    def __init__(self, schema: dict, ui_schema: dict, widget_builder: 'WidgetBuilder', *args, **kwargs):
+        kwargs['orientation'] = Qt.Horizontal
+        super().__init__(schema, ui_schema, widget_builder, *args, **kwargs)
 
     @state_property
     def state(self) -> int:

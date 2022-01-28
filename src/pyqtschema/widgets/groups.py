@@ -11,8 +11,8 @@ from pyqtschema.widgets.utils import iter_layout_widgets
 
 class ObjectSchemaWidget(SchemaWidgetMixin, QGroupBox):
 
-    def __init__(self, schema: dict, ui_schema: dict, widget_builder: 'WidgetBuilder'):
-        super().__init__(schema, ui_schema, widget_builder)
+    def __init__(self, schema: dict, ui_schema: dict, widget_builder: 'WidgetBuilder', *args, **kwargs):
+        super().__init__(schema, ui_schema, widget_builder, *args, **kwargs)
 
         self.widgets = self.populate_from_schema(schema, ui_schema, widget_builder)
 

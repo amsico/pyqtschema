@@ -13,8 +13,8 @@ class ArrayControlsWidget(QWidget):
     on_move_up = pyqtSignal()
     on_move_down = pyqtSignal()
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         style = self.style()
 
@@ -41,8 +41,8 @@ class ArrayControlsWidget(QWidget):
 
 class ArrayRowWidget(QWidget):
 
-    def __init__(self, widget: QWidget, controls: ArrayControlsWidget):
-        super().__init__()
+    def __init__(self, widget: QWidget, controls: ArrayControlsWidget, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         layout = QHBoxLayout()
         layout.addWidget(widget)
