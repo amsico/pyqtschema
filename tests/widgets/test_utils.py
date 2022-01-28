@@ -1,4 +1,4 @@
-from pyqtschema.utils import is_concrete_schema
+from pyqtschema.widgets.utils import is_concrete_schema
 
 
 def test_is_concrete_schema():
