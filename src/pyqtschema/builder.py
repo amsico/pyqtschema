@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict
+from typing import Dict, Optional
 
 from jsonschema.validators import validator_for
 from . import widgets
@@ -50,7 +50,11 @@ class WidgetBuilder(IBuilder):
         self.widget_map = deepcopy(self.default_widget_map)
         self.validator_cls = validator_cls
 
-    def create_form(self, schema: Dict, ui_schema: Dict = None, state: Dict = None) -> widgets.SchemaWidgetMixin:
+    def create_form(self,
+                    schema: Dict,
+                    ui_schema: Optional[Dict] = None,
+                    state: Optional[Dict] = None
+                    ) -> widgets.SchemaWidgetMixin:
         if ui_schema is None:
             ui_schema = {}
 
