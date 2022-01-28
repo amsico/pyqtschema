@@ -8,20 +8,6 @@ from pyqtschema.widgets import SchemaWidgetMixin
 from .utils import iter_layout_widgets, state_property, is_concrete_schema
 
 
-class CheckboxSchemaWidget(SchemaWidgetMixin, QtWidgets.QCheckBox):
-
-    @state_property
-    def state(self) -> bool:
-        return self.isChecked()
-
-    @state.setter
-    def state(self, checked: bool):
-        self.setChecked(checked)
-
-    def configure(self):
-        self.stateChanged.connect(lambda _: self.on_changed.emit(self.state))
-
-
 class SpinDoubleSchemaWidget(SchemaWidgetMixin, QtWidgets.QDoubleSpinBox):
 
     @state_property
