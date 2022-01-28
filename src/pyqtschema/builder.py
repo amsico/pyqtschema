@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from jsonschema.validators import validator_for
 from . import widgets
+from .builder_opt import IBuilder
 from .defaults import compute_defaults
 
 
@@ -15,7 +16,7 @@ def get_schema_type(schema: dict) -> str:
     return schema['type']
 
 
-class WidgetBuilder:
+class WidgetBuilder(IBuilder):
     default_widget_map = {
         "boolean": {"checkbox": widgets.CheckboxSchemaWidget, "enum": widgets.EnumSchemaWidget},
         "object": {"object": widgets.ObjectSchemaWidget, "enum": widgets.EnumSchemaWidget},
