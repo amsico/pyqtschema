@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import Dict
 
 from jsonschema.validators import validator_for
 from . import widgets
@@ -20,10 +21,14 @@ class WidgetBuilder(IBuilder):
     default_widget_map = {
         "boolean": {"checkbox": widgets.CheckboxSchemaWidget, "enum": widgets.EnumSchemaWidget},
         "object": {"object": widgets.ObjectSchemaWidget, "enum": widgets.EnumSchemaWidget},
-        "number": {"spin": widgets.SpinDoubleSchemaWidget, "text": widgets.TextSchemaWidget, "enum": widgets.EnumSchemaWidget},
-        "string": {"textarea": widgets.TextAreaSchemaWidget, "text": widgets.TextSchemaWidget, "password": widgets.PasswordWidget,
-                   "filepath": widgets.FilepathSchemaWidget, "colour": widgets.ColorSchemaWidget, "enum": widgets.EnumSchemaWidget},
-        "integer": {"spin": widgets.SpinSchemaWidget, "text": widgets.TextSchemaWidget, "range": widgets.IntegerRangeSchemaWidget,
+        "number": {"spin": widgets.SpinDoubleSchemaWidget, "text": widgets.TextSchemaWidget,
+                   "enum": widgets.EnumSchemaWidget},
+        "string": {"textarea": widgets.TextAreaSchemaWidget, "text": widgets.TextSchemaWidget,
+                   "password": widgets.PasswordWidget,
+                   "filepath": widgets.FilepathSchemaWidget, "colour": widgets.ColorSchemaWidget,
+                   "enum": widgets.EnumSchemaWidget},
+        "integer": {"spin": widgets.SpinSchemaWidget, "text": widgets.TextSchemaWidget,
+                    "range": widgets.IntegerRangeSchemaWidget,
                     "enum": widgets.EnumSchemaWidget},
         "array": {"array": widgets.ArraySchemaWidget, "enum": widgets.EnumSchemaWidget}
     }
@@ -45,7 +50,10 @@ class WidgetBuilder(IBuilder):
         self.widget_map = deepcopy(self.default_widget_map)
         self.validator_cls = validator_cls
 
-    def create_form(self, schema: dict, ui_schema: dict, state=None) -> widgets.SchemaWidgetMixin:
+    def create_form(self, schema: Dict, ui_schema: Dict = None, state: Dict = None) -> widgets.SchemaWidgetMixin:
+        if ui_schema is None:
+            ui_schema = {}
+
         validator_cls = self.validator_cls
         if validator_cls is None:
             validator_cls = validator_for(schema)
