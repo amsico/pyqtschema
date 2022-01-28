@@ -8,63 +8,6 @@ from pyqtschema.widgets import SchemaWidgetMixin
 from .utils import iter_layout_widgets, state_property, is_concrete_schema
 
 
-class QColorButton(QtWidgets.QPushButton):
-    """Color picker widget QPushButton subclass.
-
-    Implementation derived from https://martinfitzpatrick.name/article/qcolorbutton-a-color-selector-tool-for-pyqt/
-    """
-
-    colorChanged = QtCore.pyqtSignal()
-
-    def __init__(self, *args, **kwargs):
-        super(QColorButton, self).__init__(*args, **kwargs)
-
-        self._color = None
-        self.pressed.connect(self.onColorPicker)
-
-    def color(self):
-        return self._color
-
-    def setColor(self, color):
-        if color != self._color:
-            self._color = color
-            self.colorChanged.emit()
-
-        if self._color:
-            self.setStyleSheet("background-color: %s;" % self._color)
-        else:
-            self.setStyleSheet("")
-
-    def onColorPicker(self):
-        dlg = QtWidgets.QColorDialog(self)
-        if self._color:
-            dlg.setCurrentColor(QtGui.QColor(self._color))
-
-        if dlg.exec_():
-            self.setColor(dlg.currentColor().name())
-
-    def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.RightButton:
-            self.setColor(None)
-
-        return super(QColorButton, self).mousePressEvent(event)
-
-
-class ColorSchemaWidget(SchemaWidgetMixin, QColorButton):
-    """Widget representation of a string with the 'color' format keyword."""
-
-    def configure(self):
-        self.colorChanged.connect(lambda: self.on_changed.emit(self.state))
-
-    @state_property
-    def state(self) -> str:
-        return self.color()
-
-    @state.setter
-    def state(self, data: str):
-        self.setColor(data)
-
-
 class FilepathSchemaWidget(SchemaWidgetMixin, QtWidgets.QWidget):
 
     def __init__(self, schema: dict, ui_schema: dict, widget_builder: 'WidgetBuilder'):

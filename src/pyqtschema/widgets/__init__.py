@@ -1,5 +1,6 @@
 
 from .boolean import CheckboxSchemaWidget
+from .color import ColorSchemaWidget
 
 from .numeric import SpinSchemaWidget, SpinDoubleSchemaWidget, IntegerRangeSchemaWidget
 
