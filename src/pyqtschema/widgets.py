@@ -8,42 +8,6 @@ from pyqtschema.widgets import SchemaWidgetMixin
 from .utils import iter_layout_widgets, state_property, is_concrete_schema
 
 
-class TextSchemaWidget(SchemaWidgetMixin, QtWidgets.QLineEdit):
-
-    def configure(self):
-        self.textChanged.connect(self.on_changed.emit)
-
-    @state_property
-    def state(self) -> str:
-        return str(self.text())
-
-    @state.setter
-    def state(self, state: str):
-        self.setText(state)
-
-
-class PasswordWidget(TextSchemaWidget):
-
-    def configure(self):
-        super().configure()
-
-        self.setEchoMode(self.Password)
-
-
-class TextAreaSchemaWidget(SchemaWidgetMixin, QtWidgets.QTextEdit):
-
-    @state_property
-    def state(self) -> str:
-        return str(self.toPlainText())
-
-    @state.setter
-    def state(self, state: str):
-        self.setPlainText(state)
-
-    def configure(self):
-        self.textChanged.connect(lambda: self.on_changed.emit(self.state))
-
-
 class CheckboxSchemaWidget(SchemaWidgetMixin, QtWidgets.QCheckBox):
 
     @state_property
