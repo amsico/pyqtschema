@@ -17,6 +17,23 @@ class SpinSchemaWidget(SchemaWidgetMixin, QSpinBox):
     def configure(self):
         self.valueChanged.connect(self.on_changed.emit)
 
+        if "maximum" in self.schema:
+            if "exclusiveMaximum" in self.schema:
+                self.setMaximum(min(self.schema["maximum"], self.schema["exclusiveMaximum"] - 1))
+            else:
+                self.setMaximum(self.schema["maximum"])
+        elif "exclusiveMaximum" in self.schema:
+            self.setMaximum(self.schema["exclusiveMaximum"] - 1)
+        if "minimum" in self.schema:
+            if "exclusiveMinimum" in self.schema:
+                self.setMinimum(min(self.schema["minimum"], self.schema["exclusiveMinimum"] + 1))
+            else:
+                self.setMinimum(self.schema["minimum"])
+        elif "exclusiveMinimum" in self.schema:
+            self.setMinimum(self.schema["exclusiveMinimum"] + 1)
+        if "multipleOf" in self.schema:
+            self.setSingleStep(self.schema["multipleOf"])
+
 
 class SpinDoubleSchemaWidget(SchemaWidgetMixin, QDoubleSpinBox):
 
@@ -30,6 +47,23 @@ class SpinDoubleSchemaWidget(SchemaWidgetMixin, QDoubleSpinBox):
 
     def configure(self):
         self.valueChanged.connect(self.on_changed.emit)
+
+        if "maximum" in self.schema:
+            if "exclusiveMaximum" in self.schema:
+                self.setMaximum(min(self.schema["maximum"], self.schema["exclusiveMaximum"]))
+            else:
+                self.setMaximum(self.schema["maximum"])
+        elif "exclusiveMaximum" in self.schema:
+            self.setMaximum(self.schema["exclusiveMaximum"])
+        if "minimum" in self.schema:
+            if "exclusiveMinimum" in self.schema:
+                self.setMinimum(min(self.schema["minimum"], self.schema["exclusiveMinimum"]))
+            else:
+                self.setMinimum(self.schema["minimum"])
+        elif "exclusiveMinimum" in self.schema:
+            self.setMinimum(self.schema["exclusiveMinimum"])
+        if "multipleOf" in self.schema:
+            self.setSingleStep(self.schema["multipleOf"])
 
 
 class IntegerRangeSchemaWidget(SchemaWidgetMixin, QSlider):
