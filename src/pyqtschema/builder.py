@@ -1,10 +1,11 @@
 from copy import deepcopy
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 from jsonschema.validators import validator_for
 from . import widgets
 from .builder_opt import IBuilder
 from .defaults import compute_defaults
+from .schema import Schema
 
 
 def get_widget_state(schema, state=None):
@@ -46,26 +47,23 @@ class WidgetBuilder(IBuilder):
         "string": lambda schema: schema.get("format", "text")
     }
 
-    def __init__(self, validator_cls=None):
+    def __init__(self, schema: Union[Dict, Schema], validator_cls=None):
         self.widget_map = deepcopy(self.default_widget_map)
-        self.validator_cls = validator_cls
+
+        self.schema: Schema = schema if isinstance(schema, Schema) else Schema(schema, validator_cls=validator_cls)
+        self.schema.check_schema()
 
     def create_form(self,
-                    schema: Dict,
                     ui_schema: Optional[Dict] = None,
                     state: Optional[Dict] = None
                     ) -> widgets.SchemaWidgetMixin:
         if ui_schema is None:
             ui_schema = {}
 
-        validator_cls = self.validator_cls
-        if validator_cls is None:
-            validator_cls = validator_for(schema)
-
-        validator_cls.check_schema(schema)
-        validator = validator_cls(schema)
-        schema_widget = self.create_widget(schema, ui_schema, state)
+        schema_widget = self.create_widget(self.schema.schema, ui_schema, state)
         form = widgets.FormWidget(schema_widget)
+
+        validator = self.schema.validator()
 
         def validate(data):
             form.clear_errors()
