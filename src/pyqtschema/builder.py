@@ -1,17 +1,9 @@
 from copy import deepcopy
 from typing import Dict, Optional, Union
 
-from jsonschema.validators import validator_for
 from . import widgets
 from .builder_opt import IBuilder
-from .defaults import compute_defaults
 from .schema import Schema
-
-
-def get_widget_state(schema, state=None):
-    if state is None:
-        return compute_defaults(schema)
-    return state
 
 
 def get_schema_type(schema: dict) -> str:
@@ -53,10 +45,7 @@ class WidgetBuilder(IBuilder):
         self.schema: Schema = schema if isinstance(schema, Schema) else Schema(schema, validator_cls=validator_cls)
         self.schema.check_schema()
 
-    def create_form(self,
-                    ui_schema: Optional[Dict] = None,
-                    state: Optional[Dict] = None
-                    ) -> widgets.SchemaWidgetMixin:
+    def create_form(self, ui_schema: Optional[Dict] = None, state: Optional[Dict] = None) -> widgets.SchemaWidgetMixin:
         if ui_schema is None:
             ui_schema = {}
 
@@ -79,7 +68,14 @@ class WidgetBuilder(IBuilder):
 
         return form
 
+    def get_widget_state(self, schema, state=None):
+        if state is None:
+            return self.schema.compute_defaults(schema)
+        return state
+
     def create_widget(self, schema: dict, ui_schema: dict, state=None) -> widgets.SchemaWidgetMixin:
+        schema = self.schema.resolve_schema(schema)
+
         schema_type = get_schema_type(schema)
 
         try:
@@ -95,7 +91,7 @@ class WidgetBuilder(IBuilder):
 
         widget = widget_cls(schema, ui_schema, self)
 
-        default_state = get_widget_state(schema, state)
+        default_state = self.get_widget_state(schema, state)
         if default_state is not None:
             widget.state = default_state
         return widget

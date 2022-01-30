@@ -46,3 +46,40 @@ class Schema:
             return self.schema[definition][key]
 
         return schema
+
+    @staticmethod
+    def _enum_defaults(schema):
+        try:
+            return schema["enum"][0]
+        except IndexError:
+            return None
+
+    def _object_defaults(self, schema):
+        return {k: self.compute_defaults(s) for k, s in schema["properties"].items()}
+
+    def _array_defaults(self, schema):
+        items_schema = schema['items']
+        if isinstance(items_schema, dict):
+            return []
+
+        return [self.compute_defaults(s) for s in schema["items"]]
+
+    def compute_defaults(self, schema):
+        schema = self.resolve_schema(schema)
+
+        if "default" in schema:
+            return schema["default"]
+
+        # Enum
+        if "enum" in schema:
+            return self._enum_defaults(schema)
+
+        schema_type = schema["type"]
+
+        if schema_type == "object":
+            return self._object_defaults(schema)
+
+        elif schema_type == "array":
+            return self._array_defaults(schema)
+
+        return None
