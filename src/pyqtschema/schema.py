@@ -35,8 +35,10 @@ class Schema:
     def check_schema(self):
         self.validator_cls.check_schema(self.schema)
 
-    def validator(self):
-        return self.validator_cls(self.schema)
+    def validator(self, schema: Dict = None):
+        if schema is None:
+            schema = self.schema
+        return self.validator_cls(schema)
 
     def resolve_schema(self, schema: Dict) -> Dict:
         """ resolve reference schema """
