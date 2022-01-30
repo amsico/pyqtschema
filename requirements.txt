@@ -1,0 +1,5 @@
+# for convenience
+jsonschema
+PyQt5
+pytest
+pytest-qt
