@@ -10,6 +10,10 @@ def get_schema_type(schema: dict) -> str:
     return schema['type']
 
 
+def has_schema_type(schema: Dict) -> bool:
+    return 'type' in schema
+
+
 class WidgetBuilder(IBuilder):
     default_widget_map = {
         "boolean": {"checkbox": widgets.CheckboxSchemaWidget, "enum": widgets.EnumSchemaWidget},
@@ -23,7 +27,8 @@ class WidgetBuilder(IBuilder):
         "integer": {"spin": widgets.SpinSchemaWidget, "text": widgets.TextSchemaWidget,
                     "range": widgets.IntegerRangeSchemaWidget,
                     "enum": widgets.EnumSchemaWidget},
-        "array": {"array": widgets.ArraySchemaWidget, "enum": widgets.EnumSchemaWidget}
+        "array": {"array": widgets.ArraySchemaWidget, "enum": widgets.EnumSchemaWidget},
+        "enum": {"enum": widgets.EnumSchemaWidget},
     }
 
     default_widget_variants = {
@@ -33,6 +38,7 @@ class WidgetBuilder(IBuilder):
         "number": "spin",
         "integer": "spin",
         "string": "text",
+        "enum": "enum",
     }
 
     widget_variant_modifiers = {
@@ -76,7 +82,12 @@ class WidgetBuilder(IBuilder):
     def create_widget(self, schema: dict, ui_schema: dict, state=None) -> widgets.SchemaWidgetMixin:
         schema = self.schema.resolve_schema(schema)
 
-        schema_type = get_schema_type(schema)
+        # schema created with pydantic do not have a type key for enum-values, always.
+        # Therefore, the schema type "enum" is used in this case.
+        if has_schema_type(schema):
+            schema_type = get_schema_type(schema)
+        elif "enum" in schema:
+            schema_type = 'enum'
 
         try:
             default_variant = self.widget_variant_modifiers[schema_type](schema)
