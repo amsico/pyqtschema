@@ -17,6 +17,10 @@ def schema_from_json(path: Path):
     return schema
 
 
+def is_ref(schema: dict):
+    return '$ref' in schema
+
+
 class Schema:
     """ Combines schema-related functinoality """
 
@@ -33,3 +37,12 @@ class Schema:
 
     def validator(self):
         return self.validator_cls(self.schema)
+
+    def resolve_schema(self, schema: Dict) -> Dict:
+        """ resolve reference schema """
+        if is_ref(schema):
+            ident = schema['$ref']
+            _first, definition, key = ident.split('/')
+            return self.schema[definition][key]
+
+        return schema
