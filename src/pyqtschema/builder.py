@@ -14,6 +14,10 @@ def has_schema_type(schema: Dict) -> bool:
     return 'type' in schema
 
 
+def is_enum(schema: dict):
+    return 'enum' in schema
+
+
 def is_any_of(schema: dict):
     return 'anyOf' in schema
 
@@ -88,15 +92,13 @@ class WidgetBuilder(IBuilder):
     def create_widget(self, schema: dict, ui_schema: dict, state=None) -> widgets.SchemaWidgetMixin:
         schema = self.schema.resolve_schema(schema)
 
-        _is_any_of = is_any_of(schema)
-
-        # schema created with pydantic do not have a type key for enum-values, always.
-        # Therefore, the schema type "enum" is used in this case.
         if has_schema_type(schema):
             schema_type = get_schema_type(schema)
-        elif "enum" in schema:
+        elif is_enum(schema):
+            # schema created with pydantic do not have a type key for enum-values, always.
+            # Therefore, the schema type "enum" is used in this case.
             schema_type = 'enum'
-        elif _is_any_of:
+        elif is_any_of(schema):
             schema_type = 'anyOf'
 
         try:
