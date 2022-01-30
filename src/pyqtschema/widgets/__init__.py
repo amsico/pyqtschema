@@ -1,3 +1,4 @@
+from .any_of import AnyOfSchemaWidget
 from .array import ArraySchemaWidget
 from .boolean import CheckboxSchemaWidget
 from .color import ColorSchemaWidget

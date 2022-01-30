@@ -57,6 +57,10 @@ class Schema:
     def _object_defaults(self, schema):
         return {k: self.compute_defaults(s) for k, s in schema["properties"].items()}
 
+    def _any_of_defaults(self, schema, definitions: Dict = None):
+        out = [self.compute_defaults(s) for s in schema["anyOf"]]
+        return out
+
     def _array_defaults(self, schema):
         items_schema = schema['items']
         if isinstance(items_schema, dict):
@@ -70,7 +74,9 @@ class Schema:
         if "default" in schema:
             return schema["default"]
 
-        # Enum
+        if 'anyOf' in schema:
+            return self._any_of_defaults(schema)
+
         if "enum" in schema:
             return self._enum_defaults(schema)
 
