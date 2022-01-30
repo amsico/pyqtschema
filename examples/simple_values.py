@@ -1,9 +1,6 @@
-import sys
-
-from PyQt5.QtWidgets import QApplication
 from pydantic import BaseModel, Field
 
-from pyqtschema.builder import WidgetBuilder
+from pyqtschema import build_example
 
 
 class Simple(BaseModel):
@@ -14,9 +11,4 @@ class Simple(BaseModel):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    builder = WidgetBuilder(Simple.schema())
-    form = builder.create_form()
-    form.show()
-
-    app.exec_()
+    build_example(Simple.schema())
