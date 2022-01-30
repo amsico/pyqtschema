@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 from PyQt5.QtWidgets import QWidget
 
-from pyqtschema.builder_opt import IBuilder
+from pyqtschema.builder_base import IBuilder
 from pyqtschema.widgets import SchemaWidgetMixin
 from pyqtschema.widgets.base import state_property
 

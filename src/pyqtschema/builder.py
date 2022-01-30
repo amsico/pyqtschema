@@ -2,7 +2,7 @@ from copy import deepcopy
 from typing import Dict, Optional, Union
 
 from . import widgets
-from .builder_opt import IBuilder
+from .builder_base import IBuilder
 from .schema import Schema
 
 
