@@ -1,10 +1,11 @@
 import sys
 from pathlib import Path
-from typing import  Dict, Callable, Optional
+from typing import Dict, Callable, Optional
 
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QAction, QScrollArea, QStyle
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QAction, QScrollArea, QStyle, QMessageBox
 
+from .__version__ import version
 from .builder import WidgetBuilder
 from .schema import schema_from_json
 
@@ -21,6 +22,7 @@ class MainWindow(QMainWindow):
         style = self.style()
 
         self.menu_file = QMenu('File', self.menuBar())
+        self.menu_help = QMenu('Help', self.menuBar())
 
         load_action = self._create_action('Load data', triggered=self.load_file,
                                           icon=style.standardIcon(QStyle.SP_FileIcon))
@@ -31,7 +33,12 @@ class MainWindow(QMainWindow):
         for _act in (load_action, save_action, quit_action):
             self.menu_file.addAction(_act)
 
+        about_action = self._create_action('About', triggered=self.about,
+                                           icon=style.standardIcon(QStyle.SP_DialogHelpButton))
+        self.menu_help.addAction(about_action)
+
         self.menuBar().addMenu(self.menu_file)
+        self.menuBar().addMenu(self.menu_help)
 
         ui_schema = {}
 
@@ -65,6 +72,10 @@ class MainWindow(QMainWindow):
 
     def save_file(self):
         pass
+
+    def about(self):
+        _text = f'PyQtSchema: {version}'
+        QMessageBox.about(self, "pyqtschema", _text)
 
 
 def run(path_schema: Path, *qt_args):
