@@ -52,18 +52,26 @@ class ObjectSchemaWidget(SchemaWidgetMixin, QGroupBox):
 
         for name, sub_schema in schema['properties'].items():
             sub_ui_schema = ui_schema.get(name, {})
+
+            _hide = sub_ui_schema.get('ui:hidden', False)
+            _disable = sub_ui_schema.get('ui:disabled', False)
+
             widget = widget_builder.create_widget(sub_schema, sub_ui_schema)  # TODO onchanged
             widget.on_changed.connect(partial(self.widget_on_changed, name))
+            widget.setHidden(_hide)
+            widget.setDisabled(_disable)
+
             _row_index = layout.rowCount()
             if widget.show_title():
                 label = sub_schema.get("title", name)
-                # layout.addRow(label, widget)
-                layout.addWidget(QLabel(label), _row_index, 0)
+                _lbl = QLabel(label)
+                _lbl.setHidden(_hide)
+                _lbl.setDisabled(_disable)
+
+                layout.addWidget(_lbl, _row_index, 0)
                 layout.addWidget(widget, _row_index, 1)
             else:
                 layout.addWidget(widget, _row_index, 0, 1, 2)
             widgets[name] = widget
 
         return widgets
-
-
