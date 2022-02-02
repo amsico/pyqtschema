@@ -61,18 +61,22 @@ class WidgetBuilder(IBuilder):
         self.schema: Schema = schema if isinstance(schema, Schema) else Schema(schema, validator_cls=validator_cls)
         self.schema.check_schema()
 
-    def create_form(self, ui_schema: Optional[Dict] = None, state: Optional[Dict] = None) -> widgets.SchemaWidgetMixin:
+    def create_form(self,
+                    ui_schema: Optional[Dict] = None,
+                    state: Optional[Dict] = None,
+                    parent=None) \
+            -> widgets.SchemaWidgetMixin:
         if ui_schema is None:
             ui_schema = {}
 
         schema_widget = self.create_widget(self.schema.schema, ui_schema, state)
-        form = widgets.FormWidget(schema_widget)
+        form = widgets.FormWidget(schema_widget, parent=parent)
 
-        validator = self.schema.validator()
+        _validator = self.schema.validator()
 
         def validate(data):
             form.clear_errors()
-            errors = [*validator.iter_errors(data)]
+            errors = [*_validator.iter_errors(data)]
 
             if errors:
                 form.display_errors(errors)
