@@ -93,7 +93,7 @@ class WidgetBuilder(IBuilder):
             return self.schema.compute_defaults(schema)
         return state
 
-    def create_widget(self, schema: dict, ui_schema: dict, state=None) -> widgets.SchemaWidgetMixin:
+    def create_widget(self, schema: dict, ui_schema: dict, state=None, parent=None) -> widgets.SchemaWidgetMixin:
         schema = self.schema.resolve_schema(schema)
 
         if has_schema_type(schema):
@@ -116,7 +116,7 @@ class WidgetBuilder(IBuilder):
         widget_variant = ui_schema.get('ui:widget', default_variant)
         widget_cls = self.widget_map[schema_type][widget_variant]
 
-        widget = widget_cls(schema, ui_schema, self)
+        widget = widget_cls(schema, ui_schema, self, parent=parent)
 
         default_state = self.get_widget_state(schema, state)
         if default_state is not None:

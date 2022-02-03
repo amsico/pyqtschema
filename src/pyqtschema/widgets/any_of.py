@@ -56,7 +56,7 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
             _combo_items.append(c_name)
             sub_ui_schema = ui_schema.get(name, {})
 
-            widget = widget_builder.create_widget(sub_schema, sub_ui_schema)  # TODO onchanged
+            widget = widget_builder.create_widget(sub_schema, sub_ui_schema, parent=self)  # TODO onchanged
             widgets[name] = widget
             widget.setVisible(False)
 

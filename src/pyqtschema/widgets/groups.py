@@ -56,7 +56,7 @@ class ObjectSchemaWidget(SchemaWidgetMixin, QGroupBox):
             _hide = sub_ui_schema.get('ui:hidden', False)
             _disable = sub_ui_schema.get('ui:disabled', False)
 
-            widget = widget_builder.create_widget(sub_schema, sub_ui_schema)  # TODO onchanged
+            widget = widget_builder.create_widget(sub_schema, sub_ui_schema, parent=self)  # TODO onchanged
             widget.on_changed.connect(partial(self.widget_on_changed, name))
             widget.setHidden(_hide)
             widget.setDisabled(_disable)

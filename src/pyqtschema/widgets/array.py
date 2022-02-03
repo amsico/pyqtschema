@@ -172,7 +172,7 @@ class ArraySchemaWidget(SchemaWidgetMixin, QGroupBox):
 
         # Create widget
         item_ui_schema = self.ui_schema.get("items", {})
-        widget = self.widget_builder.create_widget(item_schema, item_ui_schema, item_state)
+        widget = self.widget_builder.create_widget(item_schema, item_ui_schema, item_state, parent=self)
         controls = ArrayControlsWidget()
 
         # Create row
