@@ -4,6 +4,14 @@ from PyQt5.QtWidgets import QDoubleSpinBox, QSpinBox, QSlider
 from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
 
 
+def range_from_schema(schema: dict):
+    # https://json-schema.org/understanding-json-schema/reference/numeric.html#range
+    # there should be an exclusive-minimum OR a minimum
+    minimum = schema.get('exclusiveMinimum', schema.get('minimum', None))
+    maximum = schema.get('exclusiveMaximum', schema.get('maximum', None))
+    return minimum, maximum
+
+
 class SpinSchemaWidget(SchemaWidgetMixin, QSpinBox):
 
     @state_property
@@ -17,20 +25,12 @@ class SpinSchemaWidget(SchemaWidgetMixin, QSpinBox):
     def configure(self):
         self.valueChanged.connect(self.on_changed.emit)
 
-        if "maximum" in self.schema:
-            if "exclusiveMaximum" in self.schema:
-                self.setMaximum(min(self.schema["maximum"], self.schema["exclusiveMaximum"] - 1))
-            else:
-                self.setMaximum(self.schema["maximum"])
-        elif "exclusiveMaximum" in self.schema:
-            self.setMaximum(self.schema["exclusiveMaximum"] - 1)
-        if "minimum" in self.schema:
-            if "exclusiveMinimum" in self.schema:
-                self.setMinimum(min(self.schema["minimum"], self.schema["exclusiveMinimum"] + 1))
-            else:
-                self.setMinimum(self.schema["minimum"])
-        elif "exclusiveMinimum" in self.schema:
-            self.setMinimum(self.schema["exclusiveMinimum"] + 1)
+        minimum, maximum = range_from_schema(self.schema)
+        if maximum:
+            self.setMaximum(maximum)
+        if minimum:
+            self.setMinimum(minimum)
+
         if "multipleOf" in self.schema:
             self.setSingleStep(self.schema["multipleOf"])
 
@@ -48,20 +48,12 @@ class SpinDoubleSchemaWidget(SchemaWidgetMixin, QDoubleSpinBox):
     def configure(self):
         self.valueChanged.connect(self.on_changed.emit)
 
-        if "maximum" in self.schema:
-            if "exclusiveMaximum" in self.schema:
-                self.setMaximum(min(self.schema["maximum"], self.schema["exclusiveMaximum"]))
-            else:
-                self.setMaximum(self.schema["maximum"])
-        elif "exclusiveMaximum" in self.schema:
-            self.setMaximum(self.schema["exclusiveMaximum"])
-        if "minimum" in self.schema:
-            if "exclusiveMinimum" in self.schema:
-                self.setMinimum(min(self.schema["minimum"], self.schema["exclusiveMinimum"]))
-            else:
-                self.setMinimum(self.schema["minimum"])
-        elif "exclusiveMinimum" in self.schema:
-            self.setMinimum(self.schema["exclusiveMinimum"])
+        minimum, maximum = range_from_schema(self.schema)
+        if maximum:
+            self.setMaximum(maximum)
+        if minimum:
+            self.setMinimum(minimum)
+
         if "multipleOf" in self.schema:
             self.setSingleStep(self.schema["multipleOf"])
 
@@ -82,22 +74,16 @@ class IntegerRangeSchemaWidget(SchemaWidgetMixin, QSlider):
 
     def configure(self):
         self.valueChanged.connect(self.on_changed.emit)
+        schema = self.schema
 
-        minimum = 0
-        if "minimum" in self.schema:
-            minimum = self.schema["minimum"]
-            if self.schema.get("exclusiveMinimum"):
-                minimum += 1
+        minimum, maximum = range_from_schema(schema)
 
-        maximum = 0
-        if "maximum" in self.schema:
-            maximum = self.schema["maximum"]
-            if self.schema.get("exclusiveMaximum"):
-                maximum -= 1
-
-        if "multipleOf" in self.schema:
-            self.setTickInterval(self.schema["multipleOf"])
-            self.setSingleStep(self.schema["multipleOf"])
+        multiple_of = schema.get('multipleOf', None)
+        if multiple_of:
+            self.setTickInterval(multiple_of)
+            self.setSingleStep(multiple_of)
             self.setTickPosition(self.TicksBothSides)
 
+        if minimum is None or maximum is None:
+            raise ValueError('Cannot create a slider without boundary conditions')
         self.setRange(minimum, maximum)
