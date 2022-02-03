@@ -12,7 +12,7 @@ class FormWidget(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        self.error_widget = QGroupBox()
+        self.error_widget = QGroupBox(parent=self)
         self.error_widget.setTitle("Errors")
         self.error_layout = QVBoxLayout()
         self.error_widget.setLayout(self.error_layout)
