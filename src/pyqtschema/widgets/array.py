@@ -47,6 +47,7 @@ class ArrayRowWidget(QWidget):
         layout = QHBoxLayout()
         layout.addWidget(widget)
         layout.addWidget(controls)
+        layout.setStretch(0, 5)
         self.setLayout(layout)
 
         self.widget = widget
