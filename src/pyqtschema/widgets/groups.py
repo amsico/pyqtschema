@@ -64,7 +64,7 @@ class ObjectSchemaWidget(SchemaWidgetMixin, QGroupBox):
             _row_index = layout.rowCount()
             if widget.show_title():
                 label = sub_schema.get("title", name)
-                _lbl = QLabel(label)
+                _lbl = QLabel(label, parent=self)
                 _lbl.setHidden(_hide)
                 _lbl.setDisabled(_disable)
 
