@@ -3,7 +3,7 @@ from functools import partial
 from typing import Tuple, Dict
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QGroupBox, QWidget, QGridLayout, QLabel, QVBoxLayout, QComboBox
+from PyQt5.QtWidgets import QGroupBox, QWidget, QGridLayout, QLabel, QVBoxLayout, QComboBox, QHBoxLayout, QSizePolicy
 
 from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
 from pyqtschema.widgets.utils import iter_layout_widgets
@@ -37,6 +37,7 @@ class ObjectSchemaWidget(SchemaWidgetMixin, QGroupBox):
                              ) -> Dict[str, QWidget]:
         # layout = QFormLayout()
         layout = QGridLayout()
+
         self.setLayout(layout)
         layout.setAlignment(Qt.AlignTop)
         self.setFlat(False)
@@ -55,6 +56,7 @@ class ObjectSchemaWidget(SchemaWidgetMixin, QGroupBox):
 
             _hide = sub_ui_schema.get('ui:hidden', False)
             _disable = sub_ui_schema.get('ui:disabled', False)
+            _show_title = sub_ui_schema.get('ui:show_title', True)
 
             widget = widget_builder.create_widget(sub_schema, sub_ui_schema, parent=self)  # TODO onchanged
             widget.on_changed.connect(partial(self.widget_on_changed, name))
@@ -62,7 +64,7 @@ class ObjectSchemaWidget(SchemaWidgetMixin, QGroupBox):
             widget.setDisabled(_disable)
 
             _row_index = layout.rowCount()
-            if widget.show_title():
+            if widget.show_title() and _show_title:
                 label = sub_schema.get("title", name)
                 _lbl = QLabel(label, parent=self)
                 _lbl.setHidden(_hide)
@@ -70,6 +72,9 @@ class ObjectSchemaWidget(SchemaWidgetMixin, QGroupBox):
 
                 layout.addWidget(_lbl, _row_index, 0)
                 layout.addWidget(widget, _row_index, 1)
+                widget: QWidget
+                widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+
             else:
                 layout.addWidget(widget, _row_index, 0, 1, 2)
             widgets[name] = widget
