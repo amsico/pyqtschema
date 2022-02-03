@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QLabel
 
@@ -39,3 +39,11 @@ class FormWidget(QWidget):
 
     def clear_errors(self):
         self.error_widget.hide()
+
+    @property
+    def state(self) -> Dict:
+        return self.widget.state
+
+    @state.setter
+    def state(self, state: dict):
+        self.widget.state = state
