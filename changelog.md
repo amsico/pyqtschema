@@ -1,5 +1,11 @@
 # Changelog
 
+### Version 0.1.4 (2022-02-04)
+
+* improve visibility of widgets (relevant widgets scale)
+* add `parent` parameter to create_widget in builder
+* pass parent to QWidgets to avoid flickering during the initialization
+
 ### Version 0.1.3 (2022-02-03)
 
 * support `ui:hidden` in ui_schema (hide an unwanted widget; default is False)
