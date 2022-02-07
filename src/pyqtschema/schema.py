@@ -22,7 +22,7 @@ def is_ref(schema: dict):
 
 
 class Schema:
-    """ Combines schema-related functinoality """
+    """ Combines schema-related functionality """
 
     def __init__(self, schema: Dict, validator_cls=None):
         self.schema: Dict = schema
