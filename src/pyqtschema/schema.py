@@ -49,6 +49,9 @@ class Schema:
 
         return schema
 
+    def definitions(self):
+        return self.schema.get('definitions', {})
+
     @staticmethod
     def _enum_defaults(schema):
         try:
