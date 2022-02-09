@@ -47,7 +47,7 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
         widgets = self.widgets
         _combo_items = []
         for sub_schema in schema.get('anyOf', []):
-            try:
+            try: # TODO: Use BBuilderClass to unify the determination
                 name = sub_schema['$ref']
                 c_name = name.split('/')[-1]
             except KeyError:
