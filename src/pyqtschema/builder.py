@@ -30,7 +30,9 @@ class WidgetBuilder(IBuilder):
                    "enum": widgets.EnumSchemaWidget},
         "string": {"textarea": widgets.TextAreaSchemaWidget, "text": widgets.TextSchemaWidget,
                    "password": widgets.PasswordWidget,
-                   "filepath": widgets.FilepathSchemaWidget, "dirpath": widgets.DirectorypathSchemaWidget,
+                   "path": widgets.FilepathSchemaWidget, "filepath": widgets.FilepathSchemaWidget,
+                   "dirpath": widgets.DirectoryPathSchemaWidget,
+                   "directory-path": widgets.DirectoryPathSchemaWidget,
                    "colour": widgets.ColorSchemaWidget, "enum": widgets.EnumSchemaWidget},
         "integer": {"spin": widgets.SpinSchemaWidget, "text": widgets.TextSchemaWidget,
                     "range": widgets.IntegerRangeSchemaWidget,
@@ -49,6 +51,7 @@ class WidgetBuilder(IBuilder):
         "string": "text",
         "enum": "enum",
         "anyOf": "anyOf",
+        "directory-path": "dirpath",
     }
 
     widget_variant_modifiers = {
