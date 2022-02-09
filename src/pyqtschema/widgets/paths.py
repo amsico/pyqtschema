@@ -5,8 +5,8 @@ from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
 
 class FilepathSchemaWidget(SchemaWidgetMixin, QWidget):
 
-    def __init__(self, schema: dict, ui_schema: dict, widget_builder: 'WidgetBuilder'):
-        super().__init__(schema, ui_schema, widget_builder)
+    def __init__(self, schema: dict, ui_schema: dict, widget_builder: 'WidgetBuilder', **kwargs):
+        super().__init__(schema, ui_schema, widget_builder, **kwargs)
 
         layout = QHBoxLayout()
         self.setLayout(layout)
@@ -32,7 +32,7 @@ class FilepathSchemaWidget(SchemaWidgetMixin, QWidget):
         self.path_widget.setText(state)
 
 
-class DirectorypathSchemaWidget(FilepathSchemaWidget):
+class DirectoryPathSchemaWidget(FilepathSchemaWidget):
     def _on_clicked(self, flag):
         path = QFileDialog.getExistingDirectory()
         self.path_widget.setText(path)
