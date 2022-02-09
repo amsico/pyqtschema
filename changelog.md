@@ -1,5 +1,9 @@
 # Changelog
 
+### Version 0.1.5 (2022-02-09)
+
+* improve path/directory-support
+
 ### Version 0.1.4 (2022-02-04)
 
 * improve visibility of widgets (relevant widgets scale)
