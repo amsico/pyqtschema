@@ -1,13 +1,15 @@
 import sys
+from json import load
 from pathlib import Path
 from typing import Dict, Callable, Optional
 
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QAction, QScrollArea, QStyle, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QAction, QScrollArea, QStyle, QMessageBox, QFileDialog
 
 from .__version__ import version
 from .builder import WidgetBuilder
 from .schema import schema_from_json
+from .utils import json_dump
 
 
 def _exit(txt: str):
@@ -43,11 +45,11 @@ class MainWindow(QMainWindow):
         ui_schema = {}
 
         builder = WidgetBuilder(schema)
-        form = builder.create_form(ui_schema)
+        self.schema_form = builder.create_form(ui_schema)
         # form.widget.on_changed.connect(lambda d: print(dumps(d, indent=4)))
 
         widget = QScrollArea()
-        widget.setWidget(form)
+        widget.setWidget(self.schema_form)
         widget.setWidgetResizable(True)
         self.setCentralWidget(widget)
 
@@ -68,10 +70,30 @@ class MainWindow(QMainWindow):
         return action
 
     def load_file(self):
-        pass
+        _json_filter = 'json (*.json)'
+        f_name = QFileDialog.getOpenFileName(self, 'Load data', '', f'{_json_filter};;All (*)')
+        if f_name[0] == '':
+            return
+
+        with open(f_name[0], 'r') as stream:
+            data = load(stream)
+        self.schema_form.state = data
 
     def save_file(self):
-        pass
+        indent = 2
+
+        _json_filter = 'json (*.json)'
+        f_name = QFileDialog.getSaveFileName(self, 'Save data', '', f'{_json_filter};;All (*)')
+        if f_name[0] == '':
+            return
+
+        filename = f_name[0]
+        if f_name[1] == _json_filter and not str(f_name[0]).endswith('.json'):
+            filename = f_name[0] + '.json'
+
+        state = self.schema_form.state
+        with open(filename, 'w') as OUT:
+            json_dump(state, OUT, indent=indent)
 
     def about(self):
         _text = f'PyQtSchema: {version}'
