@@ -120,6 +120,17 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
         else:
             _done = False
             for idx, _schema in enumerate(self.any_of_schemas):
+                if isinstance(state, dict):
+                    # TODO: improve the workaround (which does not work for nested structures)
+                    # verify key manually, since additionalProperties is not working (due to a bug? in jsonschema)
+                    stop = False
+                    for key in state.keys():
+                        stop = key not in _schema.schema['properties'].get(CHECKER_KEY, {}).get('properties', {})
+                        if stop:
+                            break
+                    if stop:
+                        continue
+
                 if _schema.is_valid_data({CHECKER_KEY: state}):
                     _done = True
                     _widgets[idx].state = state
