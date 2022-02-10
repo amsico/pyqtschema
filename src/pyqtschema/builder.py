@@ -22,6 +22,10 @@ def is_any_of(schema: dict):
     return 'anyOf' in schema
 
 
+def is_all_of(schema: dict):
+    return 'allOf' in schema
+
+
 class WidgetBuilder(IBuilder):
     default_widget_map = {
         "boolean": {"checkbox": widgets.CheckboxSchemaWidget, "enum": widgets.EnumSchemaWidget},
@@ -107,6 +111,12 @@ class WidgetBuilder(IBuilder):
             schema_type = 'enum'
         elif is_any_of(schema):
             schema_type = 'anyOf'
+        elif is_all_of(schema):
+            # workaround for interesting allOf-pydantic behaviour
+            if len(schema.get('allOf', [])) == 1:
+                return self.create_widget(schema['allOf'][0], ui_schema, state=state, parent=parent)
+            else:
+                raise NotImplementedError('allOf is not supported')
 
         try:
             default_variant = self.widget_variant_modifiers[schema_type](schema)
