@@ -8,8 +8,6 @@ from pyqtschema.builder import WidgetBuilder
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
 
-    builder = WidgetBuilder()
-
     schema = {
         "type": "object",
         "title": "Number fields and widgets",
@@ -62,7 +60,9 @@ if __name__ == "__main__":
         }
 
     }
-    form = builder.create_form(schema, ui_schema)
+
+    builder = WidgetBuilder(schema)
+    form = builder.create_form(ui_schema)
     form.widget.state = {
         "schema_path": "some_file.py",
         "integerRangeSteps": 60,
@@ -76,4 +76,3 @@ if __name__ == "__main__":
     form.widget.on_changed.connect(lambda d: print(dumps(d, indent=4)))
 
     app.exec_()
-
