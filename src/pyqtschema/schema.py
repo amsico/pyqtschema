@@ -3,7 +3,7 @@ from json import load, dump
 from typing import Dict
 
 from jsonschema import Draft7Validator
-from jsonschema.validators import validator_for
+from jsonschema.validators import validator_for, validate
 
 
 def validate_schema_definition(schema: Dict):
@@ -34,6 +34,13 @@ class Schema:
 
     def check_schema(self):
         self.validator_cls.check_schema(self.schema)
+
+    def is_valid_data(self, data):
+        try:
+            validate(self.schema, data)
+            return True
+        except Exception:
+            return False
 
     def validator(self, schema: Dict = None):
         if schema is None:
