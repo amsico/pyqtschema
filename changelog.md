@@ -1,5 +1,11 @@
 # Changelog
 
+### Version 0.1.6 (2022-02-10)
+
+* improve anyOf support:
+  * setting a state may modify the combo-box (if entry was changed)
+  * improve default-support
+
 ### Version 0.1.5 (2022-02-09)
 
 * improve path/directory-support
