@@ -1,8 +1,8 @@
+from abc import abstractmethod
 from copy import deepcopy
 from typing import Dict, Optional, Union
 
 from . import widgets
-from .builder_base import IBuilder
 from .schema import Schema
 
 
@@ -24,6 +24,14 @@ def is_any_of(schema: dict):
 
 def is_all_of(schema: dict):
     return 'allOf' in schema
+
+
+class IBuilder:
+    """ Defines a builder-interface """
+
+    @abstractmethod
+    def create_widget(self, schema: dict, ui_schema: dict, state=None) -> 'SchemaWidgetMixin':
+        raise NotImplementedError()
 
 
 class WidgetBuilder(IBuilder):
