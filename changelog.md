@@ -1,5 +1,12 @@
 # Changelog
 
+### Version 0.1.7 (2022-02-11)
+
+* improve the readme-file
+* add simple load/save functionality to the application
+* add changelog to project-description
+* add workaround for pydantic-allOf schema
+
 ### Version 0.1.6 (2022-02-10)
 
 * improve anyOf support:
