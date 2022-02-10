@@ -17,6 +17,9 @@ class Windows(BaseModel):
 class Selection(BaseModel):
     system: Union[Linux, Windows] = Field(default=Windows())
 
+    class Config:
+        extra = 'forbid'
+
 
 if __name__ == '__main__':
     build_example(Selection.schema())

@@ -1,11 +1,33 @@
 from collections import OrderedDict
 from functools import partial
-from typing import Dict
+from typing import Dict, List
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QGroupBox
 
+from ..schema import Schema
 from .base import state_property, SchemaWidgetMixin
 from .utils import iter_layout_widgets
+
+CHECKER_KEY = 'checker'
+
+
+def _any_of_schema(schema: dict, widget_builder: 'WidgetBuilder') -> List[Schema]:
+    """ """
+    out = []
+    for _any in schema['anyOf']:
+        _schema = {'type': 'object',
+                   'properties': {
+                       CHECKER_KEY: widget_builder.schema.resolve_schema(_any)
+                   },
+                   'definitions': widget_builder.schema.definitions(),
+                   "schema": {
+                       'additionalProperties': False,
+                   },
+                   'additionalProperties': False,
+                   }
+        out.append(Schema(_schema))
+
+    return out
 
 
 class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
@@ -18,6 +40,8 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
 
         self.widgets: OrderedDict = OrderedDict()
         self.populate_from_schema(schema, ui_schema, widget_builder)
+
+        self.any_of_schemas: List[Schema] = _any_of_schema(schema, widget_builder)
 
     def configure(self):
         if 'title' in self.schema:
@@ -47,7 +71,7 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
         widgets = self.widgets
         _combo_items = []
         for sub_schema in schema.get('anyOf', []):
-            try: # TODO: Use BBuilderClass to unify the determination
+            try:  # TODO: Use BBuilderClass to unify the determination
                 name = sub_schema['$ref']
                 c_name = name.split('/')[-1]
             except KeyError:
@@ -94,8 +118,16 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
             for idx, _dict in enumerate(state):
                 _widgets[idx].state = _dict
         else:
-            _idx = self.select_combo.currentIndex()
-            _widgets[_idx].state = state
+            _done = False
+            for idx, _schema in enumerate(self.any_of_schemas):
+                if _schema.is_valid_data({CHECKER_KEY: state}):
+                    _done = True
+                    _widgets[idx].state = state
+                    self.select_combo.setCurrentIndex(idx)
+
+            if not _done:
+                _idx = self.select_combo.currentIndex()
+                _widgets[_idx].state = state
 
     def show_title(self) -> bool:
         return False
