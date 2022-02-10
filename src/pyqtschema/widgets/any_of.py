@@ -135,6 +135,7 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
                     _done = True
                     _widgets[idx].state = state
                     self.select_combo.setCurrentIndex(idx)
+                    break
 
             if not _done:
                 _idx = self.select_combo.currentIndex()
