@@ -38,7 +38,8 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
 
         super().__init__(schema, ui_schema, widget_builder, *args, **kwargs)
 
-        self.widgets: OrderedDict = OrderedDict()
+        self.widget_labels: List = []
+        self.widgets: List = []
         self.populate_from_schema(schema, ui_schema, widget_builder)
 
         self.any_of_schemas: List[Schema] = _any_of_schema(schema, widget_builder)
@@ -68,7 +69,6 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
                              ) -> Dict[str, QWidget]:
         self.setFlat(False)
 
-        widgets = self.widgets
         _combo_items = []
         for sub_schema in schema.get('anyOf', []):
             try:  # TODO: Use BBuilderClass to unify the determination
@@ -81,7 +81,8 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
             sub_ui_schema = ui_schema.get(name, {})
 
             widget = widget_builder.create_widget(sub_schema, sub_ui_schema, parent=self)  # TODO onchanged
-            widgets[name] = widget
+            self.widget_labels.append(c_name)
+            self.widgets.append(widget)
             widget.setVisible(False)
 
             widget.on_changed.connect(partial(self.widget_on_changed, name))
@@ -94,7 +95,7 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
             self.items_group.layout().addWidget(widget)
 
         self.select_combo.addItems(_combo_items)
-        return widgets
+        return self.widgets
 
     def widget_on_changed(self, name: str, value):
         # self.state[name] = value
@@ -103,8 +104,7 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
     @state_property
     def state(self) -> dict:
         _idx = self.select_combo.currentIndex()
-        _widgets = list(self.widgets.values())
-        return _widgets[_idx].state
+        return self.widgets[_idx].state
 
     @state.setter
     def state(self, state: dict):
@@ -113,10 +113,13 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
         #   state is a list => set state to all widgets
         # Background:
         #   the function may be called after initializing the form including all defaults for any possible item
-        _widgets = list(self.widgets.values())
+        _widgets = self.widgets
         if isinstance(state, (list, tuple)):
-            for idx, _dict in enumerate(state):
-                _widgets[idx].state = _dict
+            for idx, _dat in enumerate(state):
+                if idx >= len(_widgets):
+                    break
+                _widgets[idx].state = _dat
+
         else:
             _done = False
             for idx, _schema in enumerate(self.any_of_schemas):

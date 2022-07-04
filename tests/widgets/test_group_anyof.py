@@ -30,7 +30,7 @@ def test_any_of_set_state(qtbot):
     value = 'Hi there'
     widget.state = value
     assert widget.state == value
-    assert widget.widgets['string'].state == value
+    assert widget.widgets[0].state == value
     assert widget.select_combo.currentIndex() == 0
 
 
@@ -43,5 +43,5 @@ def test_any_of_set_state_switch(qtbot):
     value = 1
     widget.state = value
     assert widget.state == 1
-    assert widget.widgets['integer'].state == value
+    assert widget.widgets[1].state == value
     assert widget.select_combo.currentIndex() == 1
