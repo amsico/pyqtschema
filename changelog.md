@@ -1,5 +1,13 @@
 # Changelog
 
+### Version 0.1.8 (2022-07-04)
+
+* state-setter in EnumWidget supports Enum-objects
+* FIX: is_valid_data function in Schema returned wrong results
+* FIX: AnyOf-Widget was not working properly with several types of the same type (issue #13)
+* add first testing for EnumWidget
+* renamed some examples
+
 ### Version 0.1.7 (2022-02-11)
 
 * improve the readme-file
