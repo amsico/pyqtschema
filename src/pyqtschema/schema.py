@@ -37,7 +37,7 @@ class Schema:
 
     def is_valid_data(self, data):
         try:
-            validate(self.schema, data)
+            validate(data, self.schema)
             return True
         except Exception:
             return False
