@@ -1,3 +1,5 @@
+from enum import Enum
+
 from PyQt5.QtWidgets import QComboBox
 
 from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
@@ -11,16 +13,20 @@ class EnumSchemaWidget(SchemaWidgetMixin, QComboBox):
 
     @state.setter
     def state(self, value):
-        index = self.findData(value)
+        val = value
+        if isinstance(val, Enum):
+            val = val.value
+        index = self.findData(val)
         if index == -1:
-            raise ValueError(value)
+            raise ValueError(val)
         self.setCurrentIndex(index)
 
     def configure(self):
         options = self.schema["enum"]
-        for i, opt in enumerate(options):
-            self.addItem(str(opt))
-            self.setItemData(i, opt)
+        for idx, opt in enumerate(options):
+            vis, val = str(opt), opt
+            self.addItem(vis)
+            self.setItemData(idx, val)
 
         self.currentIndexChanged.connect(lambda _: self.on_changed.emit(self.state))
 
