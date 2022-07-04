@@ -7,9 +7,9 @@ from pyqtschema import build_example
 
 
 class UnionIssue(BaseModel):
-    """ Exporter configuration """
-    # the str-schema is {type: string}
-    # the Path-schema is {type: string, format=path}
+    # see issue #13:
+    #   the str-schema is {type: string}
+    #   the Path-schema is {type: string, format=path}
     output: Union[str, Path] = Field(default=None)
 
 

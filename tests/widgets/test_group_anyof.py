@@ -45,3 +45,22 @@ def test_any_of_set_state_switch(qtbot):
     assert widget.state == 1
     assert widget.widgets['integer'].state == value
     assert widget.select_combo.currentIndex() == 1
+
+
+schema_issue_13 = {
+    'title': 'UnionIssue',
+    'type': 'object', 'properties': {
+        'output': {
+            'title': 'Output',
+            'anyOf': [{'type': 'string'}, {'type': 'string', 'format': 'path'}]
+        }
+    }
+}
+
+
+def test_any_of_init_issue_13(qtbot):
+    builder = WidgetBuilder(schema_issue_13)
+    sub_schema = schema_issue_13['properties']['output']
+    widget = AnyOfSchemaWidget(sub_schema, {}, builder)
+
+    assert len(widget.widgets) == 2
