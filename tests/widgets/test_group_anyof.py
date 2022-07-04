@@ -19,6 +19,7 @@ def test_any_of_init(qtbot):
     widget = AnyOfSchemaWidget(sub_schema, {}, builder)
 
     assert widget.state == ""
+    assert len(widget.widgets) == 2
 
 
 def test_any_of_set_state(qtbot):
