@@ -1,5 +1,11 @@
 # Changelog
 
+### Version 0.1.9 (2022-07-12)
+
+* FIX: default calculation for simple AllOf-cases
+* New example for ui_schema usage
+* New example for simple AllOf case
+
 ### Version 0.1.8 (2022-07-04)
 
 * state-setter in EnumWidget supports Enum-objects
@@ -18,8 +24,8 @@
 ### Version 0.1.6 (2022-02-10)
 
 * improve anyOf support:
-  * setting a state may modify the combo-box (if entry was changed)
-  * improve default-support
+    * setting a state may modify the combo-box (if entry was changed)
+    * improve default-support
 
 ### Version 0.1.5 (2022-02-09)
 
