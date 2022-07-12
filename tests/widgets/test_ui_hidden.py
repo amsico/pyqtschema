@@ -11,7 +11,13 @@ class Simple(BaseModel):
     integer: int
 
 
+class SubSchema(BaseModel):
+    name: str
+    sub: Simple
+
+
 schema = Simple.schema()
+sub_schema = SubSchema.schema()
 
 
 def test_hide_widget(qtbot):
@@ -36,3 +42,16 @@ def test_disable_widget(qtbot):
 
     assert widget.widget.widgets['string'].isEnabled()
     assert not widget.widget.widgets['integer'].isEnabled()
+
+
+def test_hide_widget_sub(qtbot):
+    ui_schema = {'sub': {'string': {'ui:hidden': True}}}
+    widget = build_example_widget(sub_schema, ui_schema=ui_schema)
+    widget.show()
+    qtbot.addWidget(widget)
+
+    assert widget.widget.widgets['name'].isVisible()
+    assert widget.widget.widgets['sub'].isVisible()
+    assert widget.widget.widgets['sub'].widgets['integer'].isVisible()
+
+    assert not widget.widget.widgets['sub'].widgets['string'].isVisible()
