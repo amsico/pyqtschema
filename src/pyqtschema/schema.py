@@ -92,7 +92,7 @@ class Schema:
         if "enum" in schema:
             return self._enum_defaults(schema)
 
-        schema_type = schema["type"]
+        schema_type = schema.get("type")
 
         if schema_type == "object":
             return self._object_defaults(schema)
