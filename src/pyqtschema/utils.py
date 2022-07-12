@@ -14,9 +14,9 @@ def build_example_widget(schema: Dict, ui_schema=None) -> QWidget:
     return form
 
 
-def build_example(schema: Dict, scrollbar: bool = True):
+def build_example(schema: Dict, ui_schema: Dict = {}, scrollbar: bool = True):
     app = QApplication(sys.argv)
-    widget = form = build_example_widget(schema)
+    widget = form = build_example_widget(schema, ui_schema=ui_schema)
     if scrollbar:
         widget = QScrollArea()
         widget.setWidget(form)
