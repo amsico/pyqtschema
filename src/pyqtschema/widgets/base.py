@@ -1,9 +1,8 @@
 from functools import wraps
 from typing import Tuple
 
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QColor
-
-from .signal import Signal
 
 
 class StateProperty(property):
@@ -22,7 +21,7 @@ state_property = StateProperty
 
 
 class SchemaWidgetMixin:
-    on_changed = Signal()
+    on_changed = pyqtSignal(object)
 
     VALID_COLOUR = '#ffffff'
     INVALID_COLOUR = '#f6989d'
