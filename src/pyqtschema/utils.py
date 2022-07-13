@@ -22,6 +22,8 @@ def build_example(schema: Dict, ui_schema: Dict = {}, scrollbar: bool = True):
         widget.setWidget(form)
         widget.setWidgetResizable(True)
 
+    form.widget.on_changed.connect(lambda xxx: print(xxx))
+
     widget.show()
     app.exec_()
 
