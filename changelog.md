@@ -1,5 +1,9 @@
 # Changelog
 
+### Version 0.2.0 (2023-05-05)
+
+* use [QtPy](https://pypi.org/project/QtPy/) instead of `PyQt5`
+
 ### Version 0.1.9 (2022-07-12)
 
 * FIX: default calculation for simple AllOf-cases
