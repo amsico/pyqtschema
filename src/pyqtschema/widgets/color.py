@@ -1,6 +1,6 @@
-from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QPushButton, QColorDialog
+from qtpy.QtCore import Signal, Qt
+from qtpy.QtGui import QColor
+from qtpy.QtWidgets import QPushButton, QColorDialog
 
 from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
 
@@ -11,7 +11,7 @@ class QColorButton(QPushButton):
     Implementation derived from https://martinfitzpatrick.name/article/qcolorbutton-a-color-selector-tool-for-pyqt/
     """
 
-    colorChanged = pyqtSignal()
+    colorChanged = Signal()
 
     def __init__(self, *args, **kwargs):
         super(QColorButton, self).__init__(*args, **kwargs)

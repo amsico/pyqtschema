@@ -1,7 +1,7 @@
 from typing import Any
 
 import pytest
-from PyQt5.QtWidgets import QWidget
+from qtpy.QtWidgets import QWidget
 
 from pyqtschema.builder import IBuilder
 from pyqtschema.widgets import SchemaWidgetMixin

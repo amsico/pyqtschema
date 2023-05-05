@@ -2,7 +2,7 @@ from collections import OrderedDict
 from functools import partial
 from typing import Dict, List
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QGroupBox
+from qtpy.QtWidgets import QWidget, QVBoxLayout, QComboBox, QGroupBox
 
 from ..schema import Schema
 from .base import state_property, SchemaWidgetMixin

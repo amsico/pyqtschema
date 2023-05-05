@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QCheckBox
+from qtpy.QtWidgets import QCheckBox
 
 from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
 

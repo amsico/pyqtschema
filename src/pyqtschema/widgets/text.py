@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QLineEdit, QTextEdit
+from qtpy.QtWidgets import QLineEdit, QTextEdit
 
 from .base import SchemaWidgetMixin, state_property
 

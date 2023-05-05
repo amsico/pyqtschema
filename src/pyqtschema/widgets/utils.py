@@ -1,6 +1,6 @@
 from typing import Iterator
 
-from PyQt5.QtWidgets import QLayoutItem, QWidget, QLayout
+from qtpy.QtWidgets import QLayoutItem, QWidget, QLayout
 
 
 def is_concrete_schema(schema: dict) -> bool:

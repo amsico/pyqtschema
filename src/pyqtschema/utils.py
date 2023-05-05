@@ -3,7 +3,7 @@ from enum import Enum
 from json import JSONEncoder, dump
 from typing import Dict, Any
 
-from PyQt5.QtWidgets import QApplication, QScrollArea, QWidget
+from qtpy.QtWidgets import QApplication, QScrollArea, QWidget
 
 from pyqtschema.builder import WidgetBuilder
 

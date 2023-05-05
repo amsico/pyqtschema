@@ -1,4 +1,3 @@
 # for convenience
 jsonschema
-PyQt5
-pytest-qt
+qtpy

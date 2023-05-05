@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QFileDialog, QHBoxLayout, QLineEdit, QPushButton, QWidget
+from qtpy.QtWidgets import QFileDialog, QHBoxLayout, QLineEdit, QPushButton, QWidget
 
 from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
 

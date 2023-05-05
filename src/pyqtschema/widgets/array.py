@@ -1,17 +1,17 @@
 from functools import partial
 from typing import List, Tuple, Optional
 
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QStyle, QGroupBox
+from qtpy.QtCore import Signal
+from qtpy.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QStyle, QGroupBox
 
 from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
 from pyqtschema.widgets.utils import iter_layout_widgets, is_concrete_schema
 
 
 class ArrayControlsWidget(QWidget):
-    on_delete = pyqtSignal()
-    on_move_up = pyqtSignal()
-    on_move_down = pyqtSignal()
+    on_delete = Signal()
+    on_move_up = Signal()
+    on_move_down = Signal()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

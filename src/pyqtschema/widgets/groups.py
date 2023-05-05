@@ -2,8 +2,8 @@ from collections import OrderedDict
 from functools import partial
 from typing import Tuple, Dict
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QGroupBox, QWidget, QGridLayout, QLabel, QVBoxLayout, QComboBox, QHBoxLayout, QSizePolicy
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QGroupBox, QWidget, QGridLayout, QLabel, QVBoxLayout, QComboBox, QHBoxLayout, QSizePolicy
 
 from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
 from pyqtschema.widgets.utils import iter_layout_widgets

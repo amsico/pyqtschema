@@ -1,5 +1,5 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDoubleSpinBox, QSpinBox, QSlider
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QDoubleSpinBox, QSpinBox, QSlider
 
 from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
 

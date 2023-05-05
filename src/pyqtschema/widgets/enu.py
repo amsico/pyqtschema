@@ -1,6 +1,6 @@
 from enum import Enum
 
-from PyQt5.QtWidgets import QComboBox
+from qtpy.QtWidgets import QComboBox
 
 from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
 

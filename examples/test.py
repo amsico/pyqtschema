@@ -1,7 +1,7 @@
 import sys
 from json import dumps
 
-from PyQt5 import QtWidgets
+from qtpy import QtWidgets
 
 from pyqtschema.builder import WidgetBuilder
 

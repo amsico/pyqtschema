@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QLabel
+from qtpy.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QLabel
 
 from pyqtschema.widgets.base import SchemaWidgetMixin
 

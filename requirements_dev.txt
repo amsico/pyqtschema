@@ -1,4 +1,3 @@
 pydantic
 pytest
 pytest-qt
-

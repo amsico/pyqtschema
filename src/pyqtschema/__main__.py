@@ -3,8 +3,8 @@ from json import load
 from pathlib import Path
 from typing import Dict, Callable, Optional
 
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QAction, QScrollArea, QStyle, QMessageBox, QFileDialog
+from qtpy.QtGui import QIcon
+from qtpy.QtWidgets import QApplication, QMainWindow, QMenu, QAction, QScrollArea, QStyle, QMessageBox, QFileDialog
 
 from .__version__ import version
 from .builder import WidgetBuilder
