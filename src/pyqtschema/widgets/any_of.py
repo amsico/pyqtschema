@@ -113,6 +113,8 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
         #   state is a list => set state to all widgets
         # Background:
         #   the function may be called after initializing the form including all defaults for any possible item
+        # Problem:
+        #   TODO: E.g. AnyOf may provide a Sting-object and a List-of-sting objects. Assuming
         _widgets = self.widgets
         if isinstance(state, (list, tuple)):
             for idx, _dat in enumerate(state):
