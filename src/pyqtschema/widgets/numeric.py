@@ -28,9 +28,8 @@ class SpinSchemaWidget(SchemaWidgetMixin, QSpinBox):
         minimum, maximum = range_from_schema(self.schema)
         if maximum is None:
             maximum = 1_000_000_000
-        if maximum:
-            self.setMaximum(maximum)
-        if minimum:
+        self.setMaximum(maximum)
+        if minimum is not None:
             self.setMinimum(minimum)
 
         if "multipleOf" in self.schema:
@@ -53,9 +52,8 @@ class SpinDoubleSchemaWidget(SchemaWidgetMixin, QDoubleSpinBox):
         minimum, maximum = range_from_schema(self.schema)
         if maximum is None:
             maximum = 1_000_000_000
-        if maximum:
-            self.setMaximum(maximum)
-        if minimum:
+        self.setMaximum(maximum)
+        if minimum is not None:
             self.setMinimum(minimum)
 
         if "multipleOf" in self.schema:
