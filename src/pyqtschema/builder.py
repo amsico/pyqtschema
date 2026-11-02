@@ -1,9 +1,12 @@
+import logging
 from abc import abstractmethod
 from copy import deepcopy
 from typing import Dict, Optional, Union
 
 from . import widgets
 from .schema import Schema
+
+logger = logging.getLogger(__name__)
 
 
 def get_schema_type(schema: dict) -> str:
@@ -135,7 +138,28 @@ class WidgetBuilder(IBuilder):
             default_variant = "enum"
 
         widget_variant = ui_schema.get('ui:widget', default_variant)
-        widget_cls = self.widget_map[schema_type][widget_variant]
+        # Unknown `format` values (e.g. pydantic 'date-time'/'date'/'uri' on
+        # string fields) or unsupported ui:widget variants would raise a
+        # KeyError below.  Fall back to the type-default variant instead.
+        variants = self.widget_map[schema_type]
+        if widget_variant not in variants:
+            candidate = self.default_widget_variants.get(schema_type)
+            fallback_variant = candidate if candidate in variants else next(iter(variants))
+
+            if 'ui:widget' in ui_schema:
+                logger.warning(
+                    "Unknown ui:widget %r for type %r is not supported; falling back to %r. "
+                    "The data may not be rendered as intended.",
+                    widget_variant, schema_type, fallback_variant,
+                )
+            else:
+                logger.warning(
+                    "Unknown format %r for type %r is not supported; falling back to %r. "
+                    "The data may not be rendered as intended.",
+                    widget_variant, schema_type, fallback_variant,
+                )
+            widget_variant = fallback_variant
+        widget_cls = variants[widget_variant]
 
         widget = widget_cls(schema, ui_schema, self, parent=parent)
 
