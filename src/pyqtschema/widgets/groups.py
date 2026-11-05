@@ -3,7 +3,7 @@ from functools import partial
 from typing import Tuple, Dict
 
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QGroupBox, QWidget, QGridLayout, QLabel, QVBoxLayout, QComboBox, QHBoxLayout, QSizePolicy
+from qtpy.QtWidgets import QCheckBox, QGroupBox, QWidget, QGridLayout, QLabel, QVBoxLayout, QComboBox, QHBoxLayout, QSizePolicy
 
 from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
 from pyqtschema.widgets.utils import iter_layout_widgets
@@ -64,7 +64,15 @@ class ObjectSchemaWidget(SchemaWidgetMixin, QGroupBox):
             widget.setDisabled(_disable)
 
             _row_index = layout.rowCount()
-            if widget.show_title() and _show_title:
+            _title = sub_schema.get("title", name)
+            # boolean fields: put the title on the checkbox itself so the shown
+            # label toggles the value and the check-indicator sits directly next
+            # to the text (a separate read-only QLabel would not be clickable).
+            if isinstance(widget, QCheckBox) and widget.show_title() and _show_title:
+                widget.setText(str(_title))
+                layout.addWidget(widget, _row_index, 0, 1, 2)
+                widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+            elif widget.show_title() and _show_title:
                 label = sub_schema.get("title", name)
                 _lbl = QLabel(label, parent=self)
                 _lbl.setHidden(_hide)

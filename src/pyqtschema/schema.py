@@ -74,11 +74,12 @@ class Schema:
         return out
 
     def _array_defaults(self, schema):
-        items_schema = schema['items']
-        if isinstance(items_schema, dict):
+        # be robust against a missing 'items' key (arrays without an
+        # item-schema): fall back to an empty array-default instead of a KeyError
+        items_schema = schema.get('items')
+        if not isinstance(items_schema, list):
             return []
-
-        return [self.compute_defaults(s) for s in schema["items"]]
+        return [self.compute_defaults(s) for s in items_schema]
 
     def compute_defaults(self, schema):
         schema = self.resolve_schema(schema)

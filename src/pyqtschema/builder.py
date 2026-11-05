@@ -25,6 +25,18 @@ def is_any_of(schema: dict):
     return 'anyOf' in schema
 
 
+def is_one_of_const(schema: dict):
+    """`oneOf` with plain `const`-alternatives (a labelled enum).
+
+    The JSON-Schema-standard way to attach labels to enum-options
+    (json-schema-spec#57): ``{"oneOf": [{"const": a, "title": "A"}, ...]}``.
+    Rendered as a ComboBox by :class:`EnumSchemaWidget`.
+    """
+    alts = schema.get('oneOf')
+    return isinstance(alts, list) and bool(alts) and all(
+        isinstance(alt, dict) and 'const' in alt for alt in alts)
+
+
 def is_all_of(schema: dict):
     return 'allOf' in schema
 
@@ -55,6 +67,7 @@ class WidgetBuilder(IBuilder):
         "array": {"array": widgets.ArraySchemaWidget, "enum": widgets.EnumSchemaWidget},
         "enum": {"enum": widgets.EnumSchemaWidget},
         "anyOf": {"anyOf": widgets.AnyOfSchemaWidget, },
+        "oneOf": {"enum": widgets.EnumSchemaWidget},
     }
 
     default_widget_variants = {
@@ -66,6 +79,7 @@ class WidgetBuilder(IBuilder):
         "string": "text",
         "enum": "enum",
         "anyOf": "anyOf",
+        "oneOf": "enum",
         "directory-path": "dirpath",
     }
 
@@ -114,7 +128,13 @@ class WidgetBuilder(IBuilder):
     def create_widget(self, schema: dict, ui_schema: dict, state=None, parent=None) -> widgets.SchemaWidgetMixin:
         schema = self.schema.resolve_schema(schema)
 
-        if has_schema_type(schema):
+        if is_one_of_const(schema):
+            # `oneOf` with plain `const`-alternatives: a labelled enum
+            # (standard-compliant way to label enum-options).  Checked before
+            # the `type` key on purpose: pydantic emits both ``type`` and oneOf
+            # for an enum-typed field - the enum-widget must win.
+            schema_type = 'oneOf'
+        elif has_schema_type(schema):
             schema_type = get_schema_type(schema)
         elif is_enum(schema):
             # schema created with pydantic do not have a type key for enum-values, always.

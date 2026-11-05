@@ -29,3 +29,9 @@ def test_schema_is_valid():
 
     assert schema.is_valid_data({'invalid_name': 1}) is False
     assert schema.is_valid_data({'invalid_name': "1"}) is False
+
+
+def test_array_defaults_without_items():
+    """Arrays without an item-schema must not raise a KeyError."""
+    schema = Schema({"type": "array"})
+    assert schema.compute_defaults({"type": "array"}) == []

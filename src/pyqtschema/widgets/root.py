@@ -34,7 +34,8 @@ class FormWidget(QWidget):
             item.widget().deleteLater()
 
         for err in errors:
-            widget = QLabel(f"<b>.{'.'.join(err.path)}</b> {err.message}")
+            path = '.'.join(str(p) for p in err.path)
+            widget = QLabel(f"<b>.{path}</b> {err.message}")
             layout.addWidget(widget)
 
     def clear_errors(self):
