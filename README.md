@@ -1,5 +1,7 @@
 # pyqtschema
 
+[![Tests](https://github.com/amsico/pyqtschema/actions/workflows/tests.yml/badge.svg)](https://github.com/amsico/pyqtschema/actions/workflows/tests.yml)
+
 `pyqtschema` allows the generation of a graphical representation of a [jsonschema](https://json-schema.org/). A given
 schema is translated to QWidgets.
 
@@ -119,6 +121,16 @@ The GitHub Actions workflow in
 [`.github/workflows/tests.yml`](.github/workflows/tests.yml) runs the
 test-suite for every combination of Python 3.11 - 3.14 and the PyQt5, PyQt6
 and PySide6 bindings. Qt runs headless via `QT_QPA_PLATFORM=offscreen`.
+
+Results are visualised in several places:
+
+* a **test-results table** (tests, passed, failed, skipped, duration) is
+  written to the summary of every job and of the combined `Test report` job,
+* failing tests are **annotated inline** in the diff via
+  `pytest-github-actions-annotate-failures`,
+* the raw **JUnit XML** files are uploaded as artifacts and can be downloaded
+  from the workflow run,
+* the status **badge** at the top of this README shows the latest result.
 
 ## Background
 

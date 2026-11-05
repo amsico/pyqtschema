@@ -56,7 +56,9 @@ jobs:
       - name: Install package and test dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[${{ matrix.qt }}]" pytest pytest-qt pydantic
+          python -m pip install -e ".[${{ matrix.qt }}]" \
+            pytest pytest-qt pydantic \
+            pytest-github-actions-annotate-failures
 
       - name: Show environment
         run: |
@@ -65,4 +67,38 @@ jobs:
           python -m pip list
 
       - name: Run test-suite
-        run: pytest tests -q
+        run: |
+          mkdir -p reports
+          pytest tests -q \
+            --junitxml="reports/junit-${{ matrix.python-version }}-${{ matrix.qt }}.xml"
+
+      - name: Write test summary
+        if: always()
+        run: python .github/scripts/junit_summary.py reports/*.xml
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: junit-${{ matrix.python-version }}-${{ matrix.qt }}
+          path: reports/*.xml
+          if-no-files-found: ignore
+
+  report:
+    name: Test report
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download all test results
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          pattern: junit-*
+          path: reports
+          merge-multiple: true
+
+      - name: Write combined summary
+        run: python .github/scripts/junit_summary.py reports/*.xml
