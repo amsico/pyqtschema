@@ -4,9 +4,16 @@ from qtpy.QtCore import Qt
 from pyqtschema.widgets import SpinSchemaWidget, SpinDoubleSchemaWidget, IntegerRangeSchemaWidget
 
 
+def schema_for(cls):
+    # a slider cannot be created without boundary conditions
+    if cls is IntegerRangeSchemaWidget:
+        return {"minimum": 0, "maximum": 10}
+    return {}
+
+
 @pytest.mark.parametrize('cls', [SpinSchemaWidget, SpinDoubleSchemaWidget, IntegerRangeSchemaWidget])
 def test_text_init(cls, builder, qtbot):
-    schema = {}
+    schema = schema_for(cls)
     widget = cls(schema, {}, builder)
     widget.show()
     qtbot.addWidget(widget)
@@ -14,7 +21,7 @@ def test_text_init(cls, builder, qtbot):
 
 @pytest.mark.parametrize('cls', [SpinSchemaWidget, SpinDoubleSchemaWidget, IntegerRangeSchemaWidget])
 def test_text_state_write_int(cls, builder, qtbot):
-    schema = {}
+    schema = schema_for(cls)
     widget = cls(schema, {}, builder)
     widget.show()
     qtbot.addWidget(widget)
@@ -27,7 +34,7 @@ def test_text_state_write_int(cls, builder, qtbot):
 
 @pytest.mark.parametrize('cls', [SpinSchemaWidget, SpinDoubleSchemaWidget, IntegerRangeSchemaWidget])
 def test_text_state_read_int(cls, builder, qtbot):
-    schema = {}
+    schema = schema_for(cls)
     widget = cls(schema, {}, builder)
     widget.show()
     qtbot.addWidget(widget)
