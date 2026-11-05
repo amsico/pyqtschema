@@ -16,8 +16,8 @@ class SubSchema(BaseModel):
     sub: Simple
 
 
-schema = Simple.schema()
-sub_schema = SubSchema.schema()
+schema = Simple.model_json_schema()
+sub_schema = SubSchema.model_json_schema()
 
 
 def test_hide_widget(qtbot):
