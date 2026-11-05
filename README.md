@@ -7,12 +7,28 @@ schema is translated to QWidgets.
 
 As usual:
 * install the pypi version
-  
+
   `pip install pyqtschema`
 
 * or clone the repository
 
   `pip install git+https://github.com/amsico/pyqtschema.git`
+
+`pyqtschema` uses [QtPy](https://pypi.org/project/QtPy/) to support any Qt binding
+(PyQt5, PyQt6, PySide2, PySide6). The binding itself is **not** installed
+automatically, so install one of your choice:
+
+```
+pip install pyqtschema[pyside6]     # PySide6
+pip install pyqtschema[pyqt5]       # PyQt5
+pip install pyqtschema[pyqt6]       # PyQt6
+pip install pyqtschema[pyside2]     # PySide2
+```
+
+or install a binding directly, e.g. `pip install PySide6`.
+
+By default QtPy prefers PyQt5 when several bindings are installed; you can control
+this via the `QT_API` environment variable.
 
 ## Usage
 
