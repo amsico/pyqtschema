@@ -39,4 +39,4 @@ class PasswordWidget(TextSchemaWidget):
     def configure(self):
         super().configure()
 
-        self.setEchoMode(self.Password)
+        self.setEchoMode(QLineEdit.EchoMode.Password)

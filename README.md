@@ -6,6 +6,7 @@ schema is translated to QWidgets.
 ## Installation
 
 As usual:
+
 * install the pypi version
 
   `pip install pyqtschema`
@@ -14,8 +15,8 @@ As usual:
 
   `pip install git+https://github.com/amsico/pyqtschema.git`
 
-`pyqtschema` uses [QtPy](https://pypi.org/project/QtPy/) to support any Qt binding
-(PyQt5, PyQt6, PySide2, PySide6). The binding itself is **not** installed
+`pyqtschema` uses [QtPy](https://pypi.org/project/QtPy/) to support any Qt binding (PyQt5, PyQt6, PySide2, PySide6). The
+binding itself is **not** installed
 automatically, so install one of your choice:
 
 ```
@@ -40,6 +41,84 @@ Use the `WidgetBuilder` in applications or run the module to visualize a schema:
 
 Several examples are available in the [examples](https://github.com/amsico/pyqtschema/tree/main/examples) folder. The
 examples use [pydantic](https://pydantic-docs.helpmanual.io/) to generate schemas easily.
+
+## Testing
+
+`pyqtschema` is built on [QtPy](https://pypi.org/project/QtPy/), so the same
+test-suite runs against every supported Qt binding (PyQt5, PyQt6, PySide6).
+The tests are plain [pytest](https://docs.pytest.org/) tests using
+[pytest-qt](https://pytest-qt.readthedocs.io/) for the Qt event loop; they
+exercise the widget-setup (schemas, state, hide/disable, ...) through the
+public `pyqtschema` API and never depend on a concrete binding.
+
+The binding for a run is selected through two environment variables that must
+point to the same binding: `QT_API` for QtPy and `PYTEST_QT_API` for
+pytest-qt.
+
+### Run the test-suite
+
+```console
+pip install -r requirements_dev.txt
+pytest
+```
+
+### Run against a specific binding
+
+Linux / macOS (bash):
+
+```bash
+QT_API=pyqt6 
+PYTEST_QT_API=pyqt6 
+pytest
+```
+
+Windows (PowerShell):
+
+```powershell
+$env:QT_API = "pyqt6"
+$env:PYTEST_QT_API = "pyqt6"
+pytest
+```
+
+Windows (cmd):
+
+```cmd
+set QT_API=pyqt6
+set PYTEST_QT_API=pyqt6
+pytest
+```
+
+### Run against all installed bindings
+
+```console
+pytest --all-backends
+```
+
+This runs the test-suite once per installed Qt binding -- each run in its own
+process -- and reports a combined result.
+
+### Run via tox
+
+[tox](https://tox.wiki/) runs the test-suite in isolated environments for
+every supported Python version (3.11 - 3.14) and Qt binding:
+
+```console
+pip install tox
+tox
+```
+
+or a single combination:
+
+```console
+tox -e py311-pyqt6
+```
+
+### Continuous integration
+
+The GitHub Actions workflow in
+[`.github/workflows/tests.yml`](.github/workflows/tests.yml) runs the
+test-suite for every combination of Python 3.11 - 3.14 and the PyQt5, PyQt6
+and PySide6 bindings. Qt runs headless via `QT_QPA_PLATFORM=offscreen`.
 
 ## Background
 

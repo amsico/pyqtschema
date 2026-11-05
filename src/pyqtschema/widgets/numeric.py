@@ -84,7 +84,7 @@ class IntegerRangeSchemaWidget(SchemaWidgetMixin, QSlider):
         if multiple_of:
             self.setTickInterval(multiple_of)
             self.setSingleStep(multiple_of)
-            self.setTickPosition(self.TicksBothSides)
+            self.setTickPosition(QSlider.TickPosition.TicksBothSides)
 
         if minimum is None or maximum is None:
             raise ValueError('Cannot create a slider without boundary conditions')

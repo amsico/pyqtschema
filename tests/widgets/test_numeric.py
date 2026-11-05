@@ -63,3 +63,13 @@ def test_default_max_when_unbounded(cls, builder, qtbot):
     widget.show()
     qtbot.addWidget(widget)
     assert widget.maximum() == 1_000_000_000
+
+
+def test_slider_multiple_of(builder, qtbot):
+    """``multipleOf`` drives tick interval/step (also works on PySide6)."""
+    schema = {"minimum": 0, "maximum": 10, "multipleOf": 2}
+    widget = IntegerRangeSchemaWidget(schema, {}, builder)
+    widget.show()
+    qtbot.addWidget(widget)
+    assert widget.tickInterval() == 2
+    assert widget.singleStep() == 2

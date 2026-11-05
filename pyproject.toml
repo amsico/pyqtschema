@@ -6,3 +6,8 @@ requires = [
     "qtpy"
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+# Make the `src` layout importable when running pytest without installing
+# the package (the test-suite lives in tests/, the package in src/).
+pythonpath = ["src"]

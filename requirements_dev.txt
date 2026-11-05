@@ -1,4 +1,8 @@
 pydantic
 pytest
 pytest-qt
-PyQt5
+# Qt bindings for local testing. The suite runs against every supported
+# binding via QtPy; the binding used for a run is selected with
+# QT_API / PYTEST_QT_API (see README, section "Testing").
+PyQt6
+PySide6
