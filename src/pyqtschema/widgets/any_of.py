@@ -106,45 +106,49 @@ class AnyOfSchemaWidget(SchemaWidgetMixin, QGroupBox):
         _idx = self.select_combo.currentIndex()
         return self.widgets[_idx].state
 
+    def _matches(self, index: int, state) -> bool:
+        """whether `state` conforms to the anyOf-branch with the given index.
+
+        jsonschema does not reject undeclared keys for nested object-branches
+        (the ``additionalProperties``-keyword is not enforced reliably), so for
+        object-valued states we additionally require every key to be a declared
+        property of that branch.
+        """
+        checker = self.any_of_schemas[index].schema['properties'][CHECKER_KEY]
+        if isinstance(state, dict):
+            props = checker.get('properties', {})
+            if any(key not in props for key in state):
+                return False
+        return self.any_of_schemas[index].is_valid_data({CHECKER_KEY: state})
+
     @state.setter
     def state(self, state: dict):
-        # assumption:
-        #   state is dict => set the state to the current selection
-        #   state is a list => set state to all widgets
-        # Background:
-        #   the function may be called after initializing the form including all defaults for any possible item
-        # Problem:
-        #   TODO: E.g. AnyOf may provide a Sting-object and a List-of-sting objects. Assuming
-        _widgets = self.widgets
+        # A list/tuple of values fills every anyOf-branch with its own default
+        # (the function may be called after initializing the form including all
+        # defaults for any possible item).
         if isinstance(state, (list, tuple)):
             for idx, _dat in enumerate(state):
-                if idx >= len(_widgets):
+                if idx >= len(self.widgets):
                     break
-                _widgets[idx].state = _dat
+                self.widgets[idx].state = _dat
+            return
 
-        else:
-            _done = False
-            for idx, _schema in enumerate(self.any_of_schemas):
-                if isinstance(state, dict):
-                    # TODO: improve the workaround (which does not work for nested structures)
-                    # verify key manually, since additionalProperties is not working (due to a bug? in jsonschema)
-                    stop = False
-                    for key in state.keys():
-                        stop = key not in _schema.schema['properties'].get(CHECKER_KEY, {}).get('properties', {})
-                        if stop:
-                            break
-                    if stop:
-                        continue
+        # A scalar/dict value selects and fills the matching anyOf-branch.
+        for idx in range(len(self.any_of_schemas)):
+            if self._matches(idx, state):
+                self.widgets[idx].state = state
+                self.select_combo.setCurrentIndex(idx)
+                return
 
-                if _schema.is_valid_data({CHECKER_KEY: state}):
-                    _done = True
-                    _widgets[idx].state = state
-                    self.select_combo.setCurrentIndex(idx)
-                    break
-
-            if not _done:
-                _idx = self.select_combo.currentIndex()
-                _widgets[_idx].state = state
+        # No branch validates the value (e.g. an unconstrained default that does
+        # not match any alternative).  Fill the first sub-widget that accepts the
+        # value instead of crashing on the fallback-selection.
+        for widget in self.widgets:
+            try:
+                widget.state = state
+                return
+            except Exception:
+                continue
 
     def show_title(self) -> bool:
         return False
