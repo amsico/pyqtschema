@@ -1,0 +1,68 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }} / ${{ matrix.qt }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      # Report every failing combination instead of stopping at the first one.
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+        # PySide2 is intentionally absent: it does not support Python 3.11+.
+        qt: [pyqt5, pyqt6, pyside6]
+
+    env:
+      # Select the same binding for QtPy and pytest-qt.
+      QT_API: ${{ matrix.qt }}
+      PYTEST_QT_API: ${{ matrix.qt }}
+      # Run Qt without a display server.
+      QT_QPA_PLATFORM: offscreen
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: |
+            setup.cfg
+            requirements_dev.txt
+
+      - name: Install Qt system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libegl1 \
+            libgl1 \
+            libxkbcommon-x11-0 \
+            libdbus-1-3 \
+            libfontconfig1
+
+      - name: Install package and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[${{ matrix.qt }}]" pytest pytest-qt pydantic
+
+      - name: Show environment
+        run: |
+          python --version
+          echo "QT_API=$QT_API PYTEST_QT_API=$PYTEST_QT_API"
+          python -m pip list
+
+      - name: Run test-suite
+        run: pytest tests -q
