@@ -130,8 +130,6 @@ class Schema:
         return None
 
 
-# --- schema preparation ---------------------------------------------------
-
 Translator = Callable[[str], str]
 
 

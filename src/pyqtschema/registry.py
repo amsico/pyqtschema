@@ -68,7 +68,6 @@ class WidgetRegistry:
         """A new registry layered on top of this one."""
         return type(self)(parent=self)
 
-    # -- registration -----------------------------------------------------
     def register(self, name: str, factory: WidgetFactory, *,
                  ref: Optional[Union[str, Iterable[str]]] = None,
                  path: Optional[Union[PathLike, Iterable[PathLike]]] = None,
@@ -106,7 +105,6 @@ class WidgetRegistry:
         """Render the field ``path`` with widget ``name``."""
         self._paths[_as_path(path)] = name
 
-    # -- lookup -----------------------------------------------------------
     def has(self, name: Any) -> bool:
         return self.factory(name) is not None
 

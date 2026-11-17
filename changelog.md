@@ -21,6 +21,19 @@
 * `Schema.resolve_schema` merges the sibling keywords of a `$ref` (`title`, `description`, `default`) and follows
   nested references
 * `ObjectSchemaWidget.state` ignores unknown properties (logged) instead of raising a `KeyError`
+* FIX: number/integer spin boxes without `minimum` accept negative values (were silently clamped to `0`); the default
+  range is the full 32-bit range for integers and unbounded for numbers, integer schema-bounds beyond 32 bit are clamped
+  (logged) instead of raising an `OverflowError`
+* FIX: `exclusiveMinimum`/`exclusiveMaximum` (pydantic `gt`/`lt`) are exclusive: integer spin boxes/sliders use the next
+  integer (`gt=2` -> minimum `3`), number spin boxes move the bound by `multipleOf` or the smallest displayable step;
+  the draft-4 boolean form is supported, if both `minimum` and `exclusiveMinimum` are given the stricter one wins
+* NEW: ui-schema options of the numeric widgets: `ui:min`/`ui:max` (bounds if the schema defines none), `ui:step` (step
+  of the arrows, must be a multiple of `multipleOf`), `ui:decimals` (decimals of a `number`); on a conflict the schema
+  wins and a warning is logged
+* `number` spin boxes show as many decimals as `multipleOf` and the bounds need (default still 2); an integer with a
+  fractional `multipleOf` keeps the step `1` (was a `TypeError`)
+* NEW: `examples/numeric.py` - all numeric scenarios side by side; every example is run as smoke-test
+  (`tests/test_examples.py`)
 
 ### Version 0.2.0 (2023-05-05)
 
