@@ -1,5 +1,27 @@
 # Changelog
 
+### Unreleased
+
+* NEW: `SchemaWidget(schema, data=None, ...)` - high-level form for a JSON-schema, optionally filled with (partial)
+  data; `state`, `on_changed`, `errors()`/`is_valid()`/`show_errors()`, `set_read_only()`, `set_translator()`
+* NEW: `WidgetRegistry` - custom widgets per schema node, selected by `ui:widget`, field path, the schema-keyword
+  `x-widget` or the `$ref`-definition name; registries can be layered (`child()`)
+* NEW: `CustomObjectWidget` - base class for custom object-widgets (`setup_ui` + `build_field`, state pass-through of
+  not-shown properties, error routing)
+* NEW: `pyqtschema.pydantic_support` (extra `pyqtschema[pydantic]`, pydantic v2) - `ModelWidgetRegistry.register_model`,
+  `model_schema`, `build_widget(model_or_instance, data)`, `to_model`
+* NEW: `normalize_schema` (nullable `type`-lists, `null`-branches in `anyOf`/`oneOf`) and `translate_schema`
+* NEW: `set_widgets_read_only` / `apply_read_only`
+* `WidgetBuilder(schema, registry=...)` honors custom widgets, `create_form` also applies the field-path registrations
+* `WidgetBuilder.create_form(..., validate=True)` - `validate=False` disables the validation on every change
+* NEW: `FormWidget.validate(data=None)` - validate, show the errors and mark the affected fields; used by
+  `create_form` and `SchemaWidget.show_errors()` (which now also marks the fields)
+* NEW: `NullSchemaWidget` for `{"type": "null"}` - the raw `WidgetBuilder` no longer fails with `KeyError: 'null'`
+  on not-normalized nullable fields (the `null`-branch of an `anyOf` is shown as a choice)
+* `Schema.resolve_schema` merges the sibling keywords of a `$ref` (`title`, `description`, `default`) and follows
+  nested references
+* `ObjectSchemaWidget.state` ignores unknown properties (logged) instead of raising a `KeyError`
+
 ### Version 0.2.0 (2023-05-05)
 
 * use [QtPy](https://pypi.org/project/QtPy/) instead of `PyQt5`

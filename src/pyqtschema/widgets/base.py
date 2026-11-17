@@ -1,8 +1,11 @@
 from functools import wraps
-from typing import Tuple
+from typing import TYPE_CHECKING, Tuple
 
 from qtpy.QtCore import Signal
 from qtpy.QtGui import QColor
+
+if TYPE_CHECKING:  # pragma: no cover
+    from pyqtschema.builder import IBuilder
 
 
 class StateProperty(property):

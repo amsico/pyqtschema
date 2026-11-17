@@ -14,6 +14,7 @@ def test_init_schema():
         "required": ["string"]
     }
     schema = Schema(_def)
+    assert schema.schema == _def
 
 
 def test_schema_is_valid():

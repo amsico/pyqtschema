@@ -1,12 +1,16 @@
-from collections import OrderedDict
+import logging
 from functools import partial
-from typing import Tuple, Dict
+from typing import TYPE_CHECKING, Tuple, Dict
 
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QCheckBox, QGroupBox, QWidget, QGridLayout, QLabel, QVBoxLayout, QComboBox, QHBoxLayout, QSizePolicy
+from qtpy.QtWidgets import QCheckBox, QGroupBox, QWidget, QGridLayout, QLabel, QSizePolicy
 
 from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
-from pyqtschema.widgets.utils import iter_layout_widgets
+
+if TYPE_CHECKING:  # pragma: no cover
+    from pyqtschema.builder import WidgetBuilder
+
+logger = logging.getLogger(__name__)
 
 
 class ObjectSchemaWidget(SchemaWidgetMixin, QGroupBox):
@@ -22,8 +26,14 @@ class ObjectSchemaWidget(SchemaWidgetMixin, QGroupBox):
 
     @state.setter
     def state(self, state: dict):
+        # partial states only update the given properties; unknown keys (e.g.
+        # data of an older schema-version) are skipped instead of raising.
         for name, value in state.items():
-            self.widgets[name].state = value
+            widget = self.widgets.get(name)
+            if widget is None:
+                logger.warning("Ignoring unknown property %r for object %r", name, self.schema.get('title', ''))
+                continue
+            widget.state = value
 
     def handle_error(self, path: Tuple[str], err: Exception):
         name, *tail = path

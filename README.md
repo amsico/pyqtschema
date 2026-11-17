@@ -35,9 +35,95 @@ this via the `QT_API` environment variable.
 
 ## Usage
 
-Use the `WidgetBuilder` in applications or run the module to visualize a schema:
+Use the `SchemaWidget` in applications or run the module to visualize a schema:
 
 `python -m pyqtschema ./path/to/your/scheam.json`
+
+### SchemaWidget
+
+`SchemaWidget` renders a JSON-schema and fills it with optional (partial) data. Properties missing in `data` keep their
+schema-defaults, unknown keys are ignored:
+
+```python
+from pyqtschema import SchemaWidget
+
+widget = SchemaWidget(MyModel.model_json_schema(), data={"name": "x"})
+widget.on_changed.connect(print)  # emitted with the whole state
+widget.state                      # current values (dict)
+widget.is_valid()                 # jsonschema validation (errors(), show_errors())
+widget.set_read_only(True)
+widget.set_translator(translate)  # translate titles/descriptions, rebuild keeping the values
+```
+
+Optional fields (`"type": ["string", "null"]`, `anyOf` with a `null`-branch) are normalized to their editable type
+(`normalize=False` disables it).
+
+### WidgetBuilder (lower level)
+
+`SchemaWidget` is built on top of the `WidgetBuilder`, which creates the widget for a schema node and is handed to every
+widget to build its children (custom widgets use it via `build_field`). Use it directly only if you need exactly that:
+
+```python
+from pyqtschema import WidgetBuilder
+
+builder = WidgetBuilder(schema, registry=registry)  # registry: optional, field paths included
+form = builder.create_form(ui_schema)               # FormWidget: root widget + error display
+form = builder.create_form(ui_schema, validate=False)  # no validation on every change ...
+form.validate()                                     # ... but on demand: shows the errors, marks the fields
+```
+
+Unlike `SchemaWidget`, the builder renders the schema *as given*: no normalization of nullable fields (an `anyOf` with a
+`null`-branch is shown as a choice), no translation, no data-merge, no read-only switch, no rebuild. Both use the same
+`FormWidget`, so validation behaves identically (`SchemaWidget.show_errors()` is `form.validate()`).
+
+### Custom widgets
+
+By default every schema node is rendered by its generic widget. A `WidgetRegistry` replaces single nodes by custom
+widgets. A node is matched - in this order - by
+
+1. `ui:widget` in the ui-schema naming a registered widget,
+2. a registered field path (`"upper"`, `"items.items.unit"`; a tuple is *one* path, a list registers several),
+3. the schema-keyword `x-widget` of the node,
+4. the name of the `$ref`-definition the node refers to.
+
+```python
+from qtpy.QtWidgets import QVBoxLayout
+from pyqtschema import CustomObjectWidget, SchemaWidget, WidgetRegistry
+
+
+class UnitWidget(CustomObjectWidget):
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.addWidget(self.build_field("value"))  # generic (or registered) sub-widget
+
+
+registry = WidgetRegistry()
+registry.register("unit", UnitWidget, ref="UnitValue")  # every $ref to #/$defs/UnitValue
+dialog_registry = registry.child()                      # layered: adds/overrides for one context
+widget = SchemaWidget(schema, data, registry=dialog_registry)
+```
+
+`CustomObjectWidget` keeps the values of properties it does not show, emits `on_changed` with the whole state and routes
+validation errors to its fields. Any `SchemaWidgetMixin`-widget (or a factory `(schema, ui_schema, builder, parent=None)`)
+can be registered; a widget implementing `set_read_only(bool)` handles read-only mode itself.
+
+### pydantic models
+
+With `pip install pyqtschema[pydantic]` (pydantic v2), `pyqtschema.pydantic_support` combines models, data and widgets:
+
+```python
+from pyqtschema.pydantic_support import ModelWidgetRegistry, build_widget, to_model
+
+registry = ModelWidgetRegistry()
+registry.register_model(UnitValue, UnitWidget)  # also used for subclasses of UnitValue
+
+widget = build_widget(Limits, registry=registry)                      # defaults
+widget = build_widget(Limits(name="x"), {"upper": {"value": 3}})      # instance + data (merged)
+limits = to_model(widget)                                             # validated Limits instance
+```
+
+`build_widget` creates the schema (`model_json_schema()` or a given `schema_factory`) and marks the definitions of
+registered models with `x-widget`, so the core `SchemaWidget` stays independent of pydantic.
 
 ## Examples
 
