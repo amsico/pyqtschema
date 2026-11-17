@@ -1,9 +1,9 @@
 """JSON-schema handling (Qt-free).
 
 * :class:`Schema` - validation, reference resolution and default values.
-* :func:`normalize_schema` - reduce constructs the widgets cannot build to
-  equivalent buildable ones (nullable ``type``-lists and ``null``-branches in
-  ``anyOf``/``oneOf`` as emitted for ``Optional`` fields by pydantic).
+* :func:`normalize_schema` - mark nullable fields (``Optional`` in pydantic)
+  with ``x-nullable``; they are rendered with a checkbox for ``None``.
+* :func:`nullable_inner` - the editable (non-null) part of a nullable field.
 * :func:`translate_schema` - apply a translator to ``title``/``description``.
 """
 from copy import deepcopy
@@ -19,6 +19,14 @@ from jsonschema.validators import validator_for, validate
 #: which points into the ``definitions`` of the root schema; keys next to
 #: ``$ref`` (``title``, ``description``, ``default``, ...) are called siblings.
 SchemaNode = Dict[str, Any]
+
+#: schema-keyword marking a node as nullable (set by :func:`normalize_schema`):
+#: the node accepts ``null`` and is rendered with a checkbox for ``None``
+NULLABLE_KEY = "x-nullable"
+
+#: keywords applying to every type: a branch with one of them cannot be merged
+#: into a ``"type": [<type>, "null"]``-list without changing the meaning
+_ALL_TYPE_KEYWORDS = ("enum", "const", "$ref", "anyOf", "oneOf", "allOf", "not", "if")
 
 
 def validate_schema_definition(schema: Dict):
@@ -93,7 +101,7 @@ class Schema:
             return None
 
     def _object_defaults(self, schema):
-        return {k: self.compute_defaults(s) for k, s in schema["properties"].items()}
+        return {k: self.compute_defaults(s) for k, s in schema.get("properties", {}).items()}
 
     def _any_of_defaults(self, schema, definitions: Dict = None):
         out = [self.compute_defaults(s) for s in schema["anyOf"]]
@@ -112,6 +120,10 @@ class Schema:
 
         if "default" in schema:
             return schema["default"]
+
+        if schema.get(NULLABLE_KEY):
+            # nullable without default: starts as None (checkbox unchecked)
+            return None
 
         if 'anyOf' in schema:
             return self._any_of_defaults(schema)
@@ -134,13 +146,20 @@ Translator = Callable[[str], str]
 
 
 def normalize_schema(schema: SchemaNode) -> SchemaNode:
-    """Deep-copy ``schema`` and normalize nullable constructs.
+    """Deep-copy ``schema`` and mark nullable constructs with ``x-nullable``.
 
-    * ``"type": ["string", "null"]`` -> ``"type": "string"``; a pure
-      ``["null"]`` falls back to ``"string"`` (nothing else to edit).
-    * ``anyOf``/``oneOf`` alternatives of ``{"type": "null"}`` are dropped; a
-      single remaining alternative is unwrapped into the node (its keys do not
-      override keys of the node itself, e.g. ``title``/``default``).
+    A nullable node keeps accepting ``null`` (validation is unchanged); the
+    widget-builder renders it with a checkbox for ``None`` around the widget
+    of its editable part (see :func:`nullable_inner`):
+
+    * ``"type": ["string", "null"]`` is marked; a pure ``["null"]`` falls back
+      to ``"string"`` (nothing else to edit).
+    * ``anyOf``/``oneOf`` with ``{"type": "null"}``-alternatives (pydantic:
+      ``int | None``) are marked.  A single remaining alternative with a plain
+      ``type`` is merged into a ``type``-list (``{"type": ["integer", "null"],
+      "minimum": 0}``) - equivalent, but the validation-errors name the
+      violated keyword instead of "not valid under any of the given schemas".
+      Keys of the node itself (``title``, ``default``, ...) are kept.
     """
     out = deepcopy(schema)
     _walk(out, _normalize_node)
@@ -173,27 +192,69 @@ def _walk(node, visit: Callable[[SchemaNode], None]) -> None:
             _walk(child, visit)
 
 
+def _is_null(alt) -> bool:
+    return isinstance(alt, dict) and alt.get("type") == "null"
+
+
 def _normalize_node(node: SchemaNode) -> None:
     raw = node.get("type")
-    if isinstance(raw, list):
+    if isinstance(raw, list) and "null" in raw:
         non_null = [t for t in raw if t != "null"]
-        if len(non_null) == 1:
-            node["type"] = non_null[0]
-        elif not non_null:
+        if non_null:
+            node[NULLABLE_KEY] = True
+        else:
             node["type"] = "string"
 
     for key in ("anyOf", "oneOf"):
         alts = node.get(key)
+        if not isinstance(alts, list) or not any(_is_null(alt) for alt in alts):
+            continue
+        kept = [alt for alt in alts if not _is_null(alt)]
+        if not kept or any(alt == {} for alt in kept):
+            # nothing left, or an unrestricted branch (`Optional[Any]`): the node
+            # accepts any value - including null, no checkbox needed
+            node.pop(key)
+            continue
+        node[NULLABLE_KEY] = True
+        branch = kept[0]
+        if (len(kept) == 1 and isinstance(branch, dict) and isinstance(branch.get("type"), str)
+                and not any(k in branch for k in _ALL_TYPE_KEYWORDS) and "type" not in node):
+            node.pop(key)
+            for k, v in branch.items():
+                node.setdefault(k, v)
+            node["type"] = [branch["type"], "null"]
+
+
+def is_nullable(node: SchemaNode) -> bool:
+    """Whether ``node`` was marked nullable by :func:`normalize_schema`."""
+    return isinstance(node, dict) and node.get(NULLABLE_KEY) is True
+
+
+def nullable_inner(node: SchemaNode) -> SchemaNode:
+    """The editable part of a nullable node: ``null`` removed.
+
+    ``{"type": ["integer", "null"], "minimum": 0}`` -> ``{"type": "integer", "minimum": 0}``;
+    ``{"anyOf": [{"$ref": ...}, {"type": "null"}], "title": "X"}`` -> ``{"$ref": ..., "title": "X"}``.
+    A ``default`` of ``None`` is dropped (the inner widget starts with its own default).
+    """
+    inner = {k: v for k, v in node.items() if k != NULLABLE_KEY}
+    if "default" in inner and inner["default"] is None:
+        inner.pop("default")
+
+    raw = inner.get("type")
+    if isinstance(raw, list):
+        non_null = [t for t in raw if t != "null"]
+        inner["type"] = non_null[0] if len(non_null) == 1 else non_null
+
+    for key in ("anyOf", "oneOf"):
+        alts = inner.get(key)
         if not isinstance(alts, list):
             continue
-        kept = [alt for alt in alts if not (isinstance(alt, dict) and alt.get("type") == "null")]
-        if len(kept) == len(alts):
-            continue
-        if not kept:
-            node.pop(key)
-        elif len(kept) == 1 and isinstance(kept[0], dict):
-            node.pop(key)
+        kept = [alt for alt in alts if not _is_null(alt)]
+        if len(kept) == 1 and isinstance(kept[0], dict):
+            inner.pop(key)
             for k, v in kept[0].items():
-                node.setdefault(k, v)
+                inner.setdefault(k, v)
         else:
-            node[key] = kept
+            inner[key] = kept
+    return inner
