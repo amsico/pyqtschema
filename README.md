@@ -55,8 +55,10 @@ widget.set_read_only(True)
 widget.set_translator(translate)  # translate titles/descriptions, rebuild keeping the values
 ```
 
-Optional fields (`"type": ["string", "null"]`, `anyOf` with a `null`-branch) are normalized to their editable type
-(`normalize=False` disables it).
+Nullable fields (`my_int: int | None`, i.e. `"type": ["integer", "null"]` or an `anyOf` with a `null`-branch) get a
+checkbox in front of their widget: unchecked the value is `None`, checked it is the value of the widget - for every
+type (numbers, text, lists, enums, nested models). `""`/`[]` and `None` stay distinguishable. `normalize=False`
+renders the schema as given (the `null`-branch of an `anyOf` as a choice). See `examples/nullable.py`.
 
 ### WidgetBuilder (lower level)
 

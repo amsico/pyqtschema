@@ -359,3 +359,12 @@ def test_ui_options_via_schema_widget(qtbot):
     count, ratio = widget.widget.widgets["count"], widget.widget.widgets["ratio"]
     assert (count.minimum(), count.singleStep()) == (0, 10)
     assert (ratio.decimals(), ratio.singleStep()) == (3, 0.05)
+
+
+
+@pytest.mark.parametrize('cls, text', [(SpinSchemaWidget, {"0"}), (SpinDoubleSchemaWidget, {"0.00", "0,00"})])
+def test_start_value_is_shown(cls, text, builder, qtbot):
+    """the start value 0 is displayed (Qt showed an empty text until the first setValue)."""
+    widget = cls({}, {}, builder)
+    qtbot.addWidget(widget)
+    assert widget.text() in text

@@ -2,7 +2,6 @@ from functools import wraps
 from typing import TYPE_CHECKING, Tuple
 
 from qtpy.QtCore import Signal
-from qtpy.QtGui import QColor
 
 if TYPE_CHECKING:  # pragma: no cover
     from pyqtschema.builder import IBuilder
@@ -26,8 +25,12 @@ state_property = StateProperty
 class SchemaWidgetMixin:
     on_changed = Signal(object)
 
-    VALID_COLOUR = '#ffffff'
-    INVALID_COLOUR = '#f6989d'
+    #: border colour of a field with a validation error
+    INVALID_COLOUR = '#d32f2f'
+    #: dynamic property set on a field with a validation error (``*[schemaInvalid="true"]``)
+    INVALID_PROPERTY = 'schemaInvalid'
+    #: separates the error rule from a style sheet the widget sets itself
+    _INVALID_MARKER = '/* pyqtschema: invalid */'
 
     def __init__(self, schema: dict, ui_schema: dict, widget_builder: 'IBuilder', **kwargs):
         super().__init__(**kwargs)
@@ -65,10 +68,22 @@ class SchemaWidgetMixin:
         self._set_valid_state(None)
 
     def _set_valid_state(self, error: Exception = None):
-        palette = self.palette()
-        colour = QColor()
-        colour.setNamedColor(self.VALID_COLOUR if error is None else self.INVALID_COLOUR)
-        palette.setColor(self.backgroundRole(), colour)
+        """Mark the field with a red border (and the message as tooltip) or unmark it.
 
-        self.setPalette(palette)
-        self.setToolTip("" if error is None else error.message)  # TODO
+        A style sheet is used instead of the palette: styles like ``windows11``
+        ignore the palette of input fields.  The rule only matches the widget
+        itself (by the dynamic property), not its children; a style sheet the
+        widget sets itself is kept.
+        """
+        own_sheet = self.styleSheet().split(self._INVALID_MARKER)[0].rstrip()
+        self.setProperty(self.INVALID_PROPERTY, error is not None)
+        if error is None:
+            self.setStyleSheet(own_sheet)
+        else:
+            rule = f'*[{self.INVALID_PROPERTY}="true"] {{ border: 1px solid {self.INVALID_COLOUR}; }}'
+            self.setStyleSheet(f"{own_sheet}\n{self._INVALID_MARKER}\n{rule}".lstrip())
+        self.setToolTip("" if error is None else getattr(error, "message", str(error)))
+
+    def is_marked_invalid(self) -> bool:
+        """Whether the field is marked with a validation error."""
+        return bool(self.property(self.INVALID_PROPERTY))

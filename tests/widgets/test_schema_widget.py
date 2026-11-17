@@ -3,7 +3,7 @@ import pytest
 from qtpy.QtWidgets import QLabel, QLineEdit, QVBoxLayout
 
 from pyqtschema import CustomObjectWidget, SchemaWidget, WidgetRegistry
-from pyqtschema.widgets import ObjectSchemaWidget, TextSchemaWidget
+from pyqtschema.widgets import NullableSchemaWidget, ObjectSchemaWidget, TextSchemaWidget
 
 SCHEMA = {
     "title": "Limits",
@@ -63,7 +63,10 @@ def test_ref_siblings_are_merged(qtbot):
 
 def test_nullable_ref_is_built(qtbot):
     widget = make(qtbot, SCHEMA)
-    assert isinstance(widget.widget.widgets["lower"], ObjectSchemaWidget)
+    lower = widget.widget.widgets["lower"]
+    assert isinstance(lower, NullableSchemaWidget)
+    assert isinstance(lower.inner, ObjectSchemaWidget)
+    assert widget.state["lower"] is None
 
 
 def test_on_changed(qtbot):
@@ -94,7 +97,7 @@ def test_custom_widget_by_ref_or_path(qtbot, key, registration):
     widget = make(qtbot, SCHEMA, {"upper": {"value": 3, "unit": "km"}}, registry=registry)
     upper = widget.widget.widgets["upper"]
     assert isinstance(upper, UnitWidget)
-    assert isinstance(widget.widget.widgets["lower"], UnitWidget)
+    assert isinstance(widget.widget.widgets["lower"].inner, UnitWidget)
     # not-built properties are passed through unchanged
     assert widget.state["upper"] == {"value": 3.0, "unit": "km"}
 
@@ -140,7 +143,7 @@ def test_child_registry_overrides(qtbot):
     child.register("other", OtherWidget, path="upper")
     widget = make(qtbot, SCHEMA, registry=child)
     assert type(widget.widget.widgets["upper"]) is OtherWidget
-    assert type(widget.widget.widgets["lower"]) is UnitWidget
+    assert type(widget.widget.widgets["lower"].inner) is UnitWidget
 
 
 def test_translator_and_rebuild(qtbot):
@@ -152,7 +155,7 @@ def test_translator_and_rebuild(qtbot):
 
 
 def test_read_only(qtbot):
-    widget = make(qtbot, SCHEMA, ui_schema={"lower": {"unit": {"ui:disabled": True}}})
+    widget = make(qtbot, SCHEMA, {"lower": {"value": 2}}, ui_schema={"lower": {"unit": {"ui:disabled": True}}})
     edits = widget.findChildren(QLineEdit)
     assert edits
     widget.set_read_only(True)
@@ -161,7 +164,9 @@ def test_read_only(qtbot):
     widget.set_read_only(False)
     name = widget.widget.widgets["name"]
     assert isinstance(name, TextSchemaWidget) and name.isEnabled()
-    assert not widget.widget.widgets["lower"].widgets["unit"].isEnabled()  # ui:disabled stays
+    lower = widget.widget.widgets["lower"].inner
+    assert lower.widgets["value"].isEnabled()
+    assert not lower.widgets["unit"].isEnabled()  # ui:disabled stays
 
 
 def test_read_only_delegates_to_custom_widget(qtbot):

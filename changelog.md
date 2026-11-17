@@ -11,6 +11,26 @@
 * NEW: `pyqtschema.pydantic_support` (extra `pyqtschema[pydantic]`, pydantic v2) - `ModelWidgetRegistry.register_model`,
   `model_schema`, `build_widget(model_or_instance, data)`, `to_model`
 * NEW: `normalize_schema` (nullable `type`-lists, `null`-branches in `anyOf`/`oneOf`) and `translate_schema`
+* NEW: `NullableSchemaWidget` - nullable fields (`int | None`, `Optional[Model]`, ...) get a checkbox for `None` in
+  front of their widget; `normalize_schema` marks them with `x-nullable` instead of dropping the `null`-branch, so
+  `None` is kept (was silently replaced by the widget default, e.g. `0`) and still validates.  A single typed branch
+  is merged into a `type`-list (`{"type": ["integer", "null"], "minimum": 0}`) for specific validation-errors.
+  `examples/nullable.py` shows all variants
+* NEW: `NullableCheckboxSchemaWidget` - `Optional[bool]` is one tristate checkbox (partially checked: `None`) instead
+  of a checkbox for `None` in front of a checkbox; while `None`, " (None)" is appended to the title
+  (`"ui:show_none": false` hides it)
+* NEW: `JsonSchemaWidget` - values of any type as JSON text: default for nodes without type (pydantic `Any`, `{}`;
+  crashed the builder with `UnboundLocalError`) and objects without `properties` (`Dict[str, Any]`), selectable for
+  every type with `"ui:widget": "json"`. A multi-line field (monospace, lists/objects indented) whose height fits
+  the content and can be dragged with the grip in the bottom-right corner. Strict: invalid JSON is marked and the state
+  keeps the last valid value.
+  `Optional[Any]` gets no checkbox for `None` (null is a JSON value). `examples/any_value.py` shows all variants
+* NEW: `"format": "color"` / `"ui:widget": "color"` selects the colour picker (only `"colour"` worked before, which
+  stays as alias). `examples/color.py` shows all variants
+* FIX: fields with a validation error get a red border (style sheet) - the palette colour used before was invisible
+  in styles like `windows11` and set a white background on valid fields (broke dark themes); `VALID_COLOUR` is
+  removed, `INVALID_COLOUR` is the border colour, `is_marked_invalid()` tells whether a field is marked
+* FIX: spin boxes show their start value (an empty text was shown for `0` until the first change)
 * NEW: `set_widgets_read_only` / `apply_read_only`
 * `WidgetBuilder(schema, registry=...)` honors custom widgets, `create_form` also applies the field-path registrations
 * `WidgetBuilder.create_form(..., validate=True)` - `validate=False` disables the validation on every change

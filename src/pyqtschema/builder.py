@@ -5,7 +5,7 @@ from typing import Dict, Optional, Union
 
 from . import widgets
 from .registry import WidgetRegistry
-from .schema import Schema
+from .schema import Schema, is_nullable, nullable_inner
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,9 @@ class WidgetBuilder(IBuilder):
                    "path": widgets.FilepathSchemaWidget, "filepath": widgets.FilepathSchemaWidget,
                    "dirpath": widgets.DirectoryPathSchemaWidget,
                    "directory-path": widgets.DirectoryPathSchemaWidget,
-                   "colour": widgets.ColorSchemaWidget, "enum": widgets.EnumSchemaWidget},
+                   "color": widgets.ColorSchemaWidget,
+                   "colour": widgets.ColorSchemaWidget,  # alias of "color", kept for existing schemas
+                   "enum": widgets.EnumSchemaWidget},
         "integer": {"spin": widgets.SpinSchemaWidget, "text": widgets.TextSchemaWidget,
                     "range": widgets.IntegerRangeSchemaWidget,
                     "enum": widgets.EnumSchemaWidget},
@@ -70,7 +72,13 @@ class WidgetBuilder(IBuilder):
         "anyOf": {"anyOf": widgets.AnyOfSchemaWidget, },
         "oneOf": {"enum": widgets.EnumSchemaWidget},
         "null": {"null": widgets.NullSchemaWidget},
+        # a node without type (pydantic `Any`: `{}`) - any JSON value
+        "any": {"json": widgets.JsonSchemaWidget},
     }
+    # every type can be edited as JSON with `"ui:widget": "json"`
+    for _variants in default_widget_map.values():
+        _variants.setdefault("json", widgets.JsonSchemaWidget)
+    del _variants
 
     default_widget_variants = {
         "boolean": "checkbox",
@@ -84,10 +92,13 @@ class WidgetBuilder(IBuilder):
         "oneOf": "enum",
         "directory-path": "dirpath",
         "null": "null",
+        "any": "json",
     }
 
     widget_variant_modifiers = {
-        "string": lambda schema: schema.get("format", "text")
+        "string": lambda schema: schema.get("format", "text"),
+        # an object without properties (`Dict[str, Any]`) has nothing to lay out
+        "object": lambda schema: "object" if schema.get("properties") else "json",
     }
 
     def __init__(self, schema: Union[Dict, Schema], validator_cls=None,
@@ -132,6 +143,16 @@ class WidgetBuilder(IBuilder):
         ref = schema.get('$ref') if isinstance(schema, dict) else None
         schema = self.schema.resolve_schema(schema)
 
+        if is_nullable(schema):
+            if nullable_inner(schema).get('type') == 'boolean' and 'ui:widget' not in ui_schema:
+                # one tristate checkbox instead of a checkbox for None in front of a checkbox
+                widget = widgets.NullableCheckboxSchemaWidget(schema, ui_schema, self, parent=parent)
+            else:
+                # checkbox for None around the widget of the editable part - the
+                # inner widget is created by this builder (registry included)
+                widget = widgets.NullableSchemaWidget(schema, ui_schema, self, parent=parent)
+            return self._init_widget(widget, schema, state)
+
         if self.registry is not None:
             factory = self.registry.resolve(schema, ui_schema, ref)
             if factory is not None:
@@ -157,6 +178,9 @@ class WidgetBuilder(IBuilder):
                 return self.create_widget(schema['allOf'][0], ui_schema, state=state, parent=parent)
             else:
                 raise NotImplementedError('allOf is not supported')
+        else:
+            # no type and no combinator (pydantic `Any`, `{}`): any JSON value
+            schema_type = 'any'
 
         try:
             default_variant = self.widget_variant_modifiers[schema_type](schema)

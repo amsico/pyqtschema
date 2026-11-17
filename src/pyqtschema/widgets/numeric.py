@@ -285,6 +285,8 @@ class SpinSchemaWidget(SchemaWidgetMixin, QSpinBox):
         minimum, maximum = int_range(self.schema, ui_schema)
         self.setMaximum(INT_MAXIMUM if maximum is None else maximum)
         self.setMinimum(INT_MINIMUM if minimum is None else minimum)
+        # Qt shows an empty text until the first `setValue` (e.g. for the start value 0)
+        self.setValue(self.value())
 
 
 class SpinDoubleSchemaWidget(SchemaWidgetMixin, QDoubleSpinBox):
@@ -323,6 +325,8 @@ class SpinDoubleSchemaWidget(SchemaWidgetMixin, QDoubleSpinBox):
         # silently clamping e.g. negative values - leave the range open instead
         self.setMaximum(FLOAT_MAXIMUM if maximum is None else maximum)
         self.setMinimum(FLOAT_MINIMUM if minimum is None else minimum)
+        # Qt shows an empty text until the first `setValue` (e.g. for the start value 0)
+        self.setValue(self.value())
 
 
 class IntegerRangeSchemaWidget(SchemaWidgetMixin, QSlider):
