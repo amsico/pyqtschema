@@ -165,6 +165,7 @@ def test_height_is_capped(qtbot):
 def test_grip_resizes_the_height(qtbot):
     widget = make(qtbot)
     widget.show()
+    qtbot.waitExposed(widget)
     json_widget = widget.widget.widgets["anything"]
     grip = json_widget.grip
     before = json_widget.height()

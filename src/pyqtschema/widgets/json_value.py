@@ -56,15 +56,21 @@ class HeightGrip(QWidget):
             self._start_height = self._target.height()
             event.accept()
 
+    def _drag_to(self, event) -> None:
+        delta = _global_pos(event).y() - self._start.y()
+        self._target.setFixedHeight(max(self._min_height, self._start_height + delta))
+        self._target.user_resized = True
+        event.accept()
+
     def mouseMoveEvent(self, event):
         if self._start is not None:
-            delta = _global_pos(event).y() - self._start.y()
-            self._target.setFixedHeight(max(self._min_height, self._start_height + delta))
-            self._target.user_resized = True
-            event.accept()
+            self._drag_to(event)
 
     def mouseReleaseEvent(self, event):
-        self._start = None
+        # the release position is applied too: not every platform (e.g. offscreen) delivers the move events
+        if self._start is not None and event.button() == Qt.LeftButton:
+            self._drag_to(event)
+            self._start = None
 
 
 class JsonSchemaWidget(SchemaWidgetMixin, QPlainTextEdit):
