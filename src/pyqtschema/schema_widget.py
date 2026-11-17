@@ -32,6 +32,8 @@ class SchemaWidget(QWidget):
             :func:`~pyqtschema.schema.normalize_schema`).
         validate: validate the state on every change and show the errors.
         validator_cls: jsonschema validator class (default: by ``$schema``).
+        context: application data handed to every widget (``widget.context``),
+            e.g. a data source for the choices of a custom widget; opaque to pyqtschema.
         parent: Qt parent.
     """
 
@@ -49,6 +51,7 @@ class SchemaWidget(QWidget):
             normalize: bool = True,
             validate: bool = True,
             validator_cls: Optional[Callable] = None,
+            context: Any = None,
             parent: Optional[QWidget] = None
     ):
         super().__init__(parent)
@@ -59,6 +62,7 @@ class SchemaWidget(QWidget):
         self._normalize = normalize
         self._validate = validate
         self._validator_cls = validator_cls
+        self._context = context
         self._read_only = False
 
         self._builder: Optional[WidgetBuilder] = None
@@ -79,7 +83,8 @@ class SchemaWidget(QWidget):
             self._form = None
 
         schema = self._prepare_schema()
-        builder = WidgetBuilder(schema, validator_cls=self._validator_cls, registry=self._registry)
+        builder = WidgetBuilder(schema, validator_cls=self._validator_cls, registry=self._registry,
+                                context=self._context)
         form = builder.create_form(deepcopy(self._raw_ui_schema), parent=self, validate=self._validate)
         if data is not None:
             form.widget.state = data
@@ -109,6 +114,16 @@ class SchemaWidget(QWidget):
     @property
     def registry(self) -> Optional[WidgetRegistry]:
         return self._registry
+
+    @property
+    def context(self) -> Any:
+        """The application context handed to the widgets (see ``context`` argument)."""
+        return self._context
+
+    def set_context(self, context: Any) -> None:
+        """Switch the context and rebuild the form keeping the values."""
+        self._context = context
+        self.rebuild(preserve_state=True)
 
     @property
     def builder(self) -> WidgetBuilder:

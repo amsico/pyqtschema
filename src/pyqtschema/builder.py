@@ -1,7 +1,7 @@
 import logging
 from abc import abstractmethod
 from copy import deepcopy
-from typing import Dict, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from . import widgets
 from .registry import WidgetRegistry
@@ -101,20 +101,30 @@ class WidgetBuilder(IBuilder):
         "object": lambda schema: "object" if schema.get("properties") else "json",
     }
 
-    def __init__(self, schema: Union[Dict, Schema], validator_cls=None,
-                 registry: Optional[WidgetRegistry] = None):
+    def __init__(
+            self,
+            schema: Union[Dict, Schema],
+            validator_cls=None,
+            registry: Optional[WidgetRegistry] = None,
+            context: Any = None
+    ):
         self.widget_map = deepcopy(self.default_widget_map)
         #: custom widgets, selected per schema-node (see :mod:`pyqtschema.registry`)
         self.registry: Optional[WidgetRegistry] = registry
+        #: application data for custom widgets (e.g. a data source for choices); opaque to pyqtschema,
+        #: available to every widget as ``self.context``
+        self.context: Any = context
 
         self.schema: Schema = schema if isinstance(schema, Schema) else Schema(schema, validator_cls=validator_cls)
         self.schema.check_schema()
 
-    def create_form(self,
-                    ui_schema: Optional[Dict] = None,
-                    state: Optional[Dict] = None,
-                    parent=None,
-                    validate: bool = True)             -> widgets.FormWidget:
+    def create_form(
+            self,
+            ui_schema: Optional[Dict] = None,
+            state: Optional[Dict] = None,
+            parent=None,
+            validate: bool = True
+    ) -> widgets.FormWidget:
         """Build the root widget wrapped in a :class:`FormWidget`.
 
         Field-path registrations of the ``registry`` are merged into

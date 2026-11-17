@@ -47,6 +47,15 @@ class SchemaWidgetMixin:
     def configure(self):
         pass
 
+    @property
+    def context(self):
+        """The application context of the form (``WidgetBuilder.context``) or None.
+
+        Custom widgets use it to reach application data (e.g. the choices of a combo box) without a
+        dependency of pyqtschema on that data; without a context they should fall back to plain editing.
+        """
+        return getattr(self.widget_builder, 'context', None)
+
     def show_title(self) -> bool:
         """ show/hide the title in the form-widget """
         return self._show_title

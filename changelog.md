@@ -6,6 +6,9 @@
   data; `state`, `on_changed`, `errors()`/`is_valid()`/`show_errors()`, `set_read_only()`, `set_translator()`
 * NEW: `WidgetRegistry` - custom widgets per schema node, selected by `ui:widget`, field path, the schema-keyword
   `x-widget` or the `$ref`-definition name; registries can be layered (`child()`)
+* NEW: `context` - application data handed from `SchemaWidget(..., context=...)`/`WidgetBuilder(..., context=...)` to
+  every widget (`widget.context`), e.g. a data source for the choices of a custom widget; opaque to pyqtschema,
+  `SchemaWidget.set_context()` rebuilds keeping the values
 * NEW: `CustomObjectWidget` - base class for custom object-widgets (`setup_ui` + `build_field`, state pass-through of
   not-shown properties, error routing)
 * NEW: `pyqtschema.pydantic_support` (extra `pyqtschema[pydantic]`, pydantic v2) - `ModelWidgetRegistry.register_model`,
