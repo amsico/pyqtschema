@@ -1,7 +1,12 @@
+from typing import TYPE_CHECKING
+
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QDoubleSpinBox, QSpinBox, QSlider
 
 from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
+
+if TYPE_CHECKING:  # pragma: no cover
+    from pyqtschema.builder import WidgetBuilder
 
 
 def range_from_schema(schema: dict):

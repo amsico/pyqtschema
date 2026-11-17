@@ -1,5 +1,4 @@
 import pytest
-from qtpy.QtCore import Qt
 
 from pyqtschema.widgets import TextSchemaWidget, TextAreaSchemaWidget, PasswordWidget
 

@@ -1,6 +1,5 @@
 from enum import Enum
 
-import pytest
 
 from pyqtschema import WidgetBuilder
 from pyqtschema.widgets import EnumSchemaWidget

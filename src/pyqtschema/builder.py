@@ -4,6 +4,7 @@ from copy import deepcopy
 from typing import Dict, Optional, Union
 
 from . import widgets
+from .registry import WidgetRegistry
 from .schema import Schema
 
 logger = logging.getLogger(__name__)
@@ -45,7 +46,7 @@ class IBuilder:
     """ Defines a builder-interface """
 
     @abstractmethod
-    def create_widget(self, schema: dict, ui_schema: dict, state=None) -> 'SchemaWidgetMixin':
+    def create_widget(self, schema: dict, ui_schema: dict, state=None) -> 'widgets.SchemaWidgetMixin':
         raise NotImplementedError()
 
 
@@ -68,6 +69,7 @@ class WidgetBuilder(IBuilder):
         "enum": {"enum": widgets.EnumSchemaWidget},
         "anyOf": {"anyOf": widgets.AnyOfSchemaWidget, },
         "oneOf": {"enum": widgets.EnumSchemaWidget},
+        "null": {"null": widgets.NullSchemaWidget},
     }
 
     default_widget_variants = {
@@ -81,14 +83,18 @@ class WidgetBuilder(IBuilder):
         "anyOf": "anyOf",
         "oneOf": "enum",
         "directory-path": "dirpath",
+        "null": "null",
     }
 
     widget_variant_modifiers = {
         "string": lambda schema: schema.get("format", "text")
     }
 
-    def __init__(self, schema: Union[Dict, Schema], validator_cls=None):
+    def __init__(self, schema: Union[Dict, Schema], validator_cls=None,
+                 registry: Optional[WidgetRegistry] = None):
         self.widget_map = deepcopy(self.default_widget_map)
+        #: custom widgets, selected per schema-node (see :mod:`pyqtschema.registry`)
+        self.registry: Optional[WidgetRegistry] = registry
 
         self.schema: Schema = schema if isinstance(schema, Schema) else Schema(schema, validator_cls=validator_cls)
         self.schema.check_schema()
@@ -96,29 +102,23 @@ class WidgetBuilder(IBuilder):
     def create_form(self,
                     ui_schema: Optional[Dict] = None,
                     state: Optional[Dict] = None,
-                    parent=None) \
-            -> widgets.SchemaWidgetMixin:
-        if ui_schema is None:
+                    parent=None,
+                    validate: bool = True)             -> widgets.FormWidget:
+        """Build the root widget wrapped in a :class:`FormWidget`.
+
+        Field-path registrations of the ``registry`` are merged into
+        ``ui_schema`` here.  With ``validate`` the state is validated on every
+        change; :meth:`FormWidget.validate` works in either case.
+        """
+        if self.registry is not None:
+            ui_schema = self.registry.apply_paths(ui_schema)
+        elif ui_schema is None:
             ui_schema = {}
 
         schema_widget = self.create_widget(self.schema.schema, ui_schema, state)
-        form = widgets.FormWidget(schema_widget, parent=parent)
-
-        _validator = self.schema.validator()
-
-        def validate(data):
-            form.clear_errors()
-            errors = [*_validator.iter_errors(data)]
-
-            if errors:
-                form.display_errors(errors)
-
-            for err in errors:
-                schema_widget.handle_error(err.path, err)
-
-        schema_widget.on_changed.connect(validate)
-
-        return form
+        return widgets.FormWidget(schema_widget, parent=parent,
+                                  validator=self.schema.validator(),
+                                  live_validation=validate)
 
     def get_widget_state(self, schema, state=None):
         if state is None:
@@ -126,7 +126,16 @@ class WidgetBuilder(IBuilder):
         return state
 
     def create_widget(self, schema: dict, ui_schema: dict, state=None, parent=None) -> widgets.SchemaWidgetMixin:
+        ui_schema = ui_schema or {}
+        # remember the reference *before* resolving it: the definition name
+        # selects registered custom widgets (see `WidgetRegistry.resolve`)
+        ref = schema.get('$ref') if isinstance(schema, dict) else None
         schema = self.schema.resolve_schema(schema)
+
+        if self.registry is not None:
+            factory = self.registry.resolve(schema, ui_schema, ref)
+            if factory is not None:
+                return self._init_widget(factory(schema, ui_schema, self, parent=parent), schema, state)
 
         if is_one_of_const(schema):
             # `oneOf` with plain `const`-alternatives: a labelled enum
@@ -182,7 +191,9 @@ class WidgetBuilder(IBuilder):
         widget_cls = variants[widget_variant]
 
         widget = widget_cls(schema, ui_schema, self, parent=parent)
+        return self._init_widget(widget, schema, state)
 
+    def _init_widget(self, widget: widgets.SchemaWidgetMixin, schema: dict, state=None) -> widgets.SchemaWidgetMixin:
         default_state = self.get_widget_state(schema, state)
         if default_state is not None:
             widget.state = default_state

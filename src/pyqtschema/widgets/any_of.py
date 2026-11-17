@@ -1,12 +1,14 @@
-from collections import OrderedDict
 from functools import partial
-from typing import Dict, List
+from typing import TYPE_CHECKING, Dict, List
 
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QComboBox, QGroupBox
 
 from ..schema import Schema
 from .base import state_property, SchemaWidgetMixin
 from .utils import iter_layout_widgets
+
+if TYPE_CHECKING:  # pragma: no cover
+    from ..builder import WidgetBuilder
 
 CHECKER_KEY = 'checker'
 

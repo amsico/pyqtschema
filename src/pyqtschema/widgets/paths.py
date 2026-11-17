@@ -1,6 +1,11 @@
+from typing import TYPE_CHECKING
+
 from qtpy.QtWidgets import QFileDialog, QHBoxLayout, QLineEdit, QPushButton, QWidget
 
 from pyqtschema.widgets.base import SchemaWidgetMixin, state_property
+
+if TYPE_CHECKING:  # pragma: no cover
+    from pyqtschema.builder import WidgetBuilder
 
 
 class FilepathSchemaWidget(SchemaWidgetMixin, QWidget):

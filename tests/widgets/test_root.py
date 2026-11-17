@@ -10,8 +10,6 @@ import pytest
 from qtpy.QtGui import QClipboard
 from qtpy.QtWidgets import QPlainTextEdit
 
-from pyqtschema.widgets import FormWidget
-
 
 @pytest.fixture
 def form(qtbot):

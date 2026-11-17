@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from qtpy.QtWidgets import (
     QApplication,
@@ -14,9 +14,19 @@ from pyqtschema.widgets.base import SchemaWidgetMixin
 
 
 class FormWidget(QWidget):
+    """Root widget: the schema-widget plus an error display.
 
-    def __init__(self, widget: SchemaWidgetMixin, *args, **kwargs):
+    Args:
+        widget: the root schema-widget.
+        validator: jsonschema validator used by :meth:`validate` (optional).
+        live_validation: validate on every change of ``widget`` (requires
+            ``validator``).
+    """
+
+    def __init__(self, widget: SchemaWidgetMixin, *args, validator=None,
+                 live_validation: bool = False, **kwargs):
         super().__init__(*args, **kwargs)
+        self.validator = validator
         layout = QVBoxLayout()
         self.setLayout(layout)
 
@@ -44,6 +54,28 @@ class FormWidget(QWidget):
         layout.addWidget(widget)
 
         self.widget = widget
+        if live_validation:
+            if validator is None:
+                raise ValueError("live_validation requires a validator")
+            widget.on_changed.connect(self.validate)
+
+    def validate(self, data: Any = None) -> List[Exception]:
+        """Validate ``data`` (default: the current state) and show the errors.
+
+        Shows the error list and routes every error to the affected field
+        (``handle_error``).  Returns the errors (empty if valid).
+        """
+        if self.validator is None:
+            raise RuntimeError("FormWidget has no validator")
+        if data is None:
+            data = self.widget.state
+        self.clear_errors()
+        errors = [*self.validator.iter_errors(data)]
+        if errors:
+            self.display_errors(errors)
+        for err in errors:
+            self.widget.handle_error(err.path, err)
+        return errors
 
     def display_errors(self, errors: Optional[List[Exception]] = None):
         """Show the given validation-errors (or re-show the previous ones).

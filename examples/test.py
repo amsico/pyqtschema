@@ -31,14 +31,14 @@ if __name__ == "__main__":
                 "items": [
                     {
                         "type": "string",
-                        "pattern": "[a-zA-Z\-'\s]+",
+                        "pattern": r"[a-zA-Z\-'\s]+",
                         "enum": [
                             "Jack", "Jill"
                         ]
                     },
                     {
                         "type": "string",
-                        "pattern": "[a-zA-Z\-'\s]+",
+                        "pattern": r"[a-zA-Z\-'\s]+",
                         "enum": [
                             "Alice", "Bob"
                         ]

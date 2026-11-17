@@ -1,4 +1,3 @@
-import pytest
 
 # see also issue https://github.com/amsico/pyqtschema/issues/12
 from pydantic import BaseModel
