@@ -28,7 +28,8 @@ class QColorButton(QPushButton):
             self.colorChanged.emit()
 
         if self._color:
-            self.setStyleSheet("background-color: %s;" % self._color)
+            # a rule (not bare declarations): the error marking appends a rule of its own
+            self.setStyleSheet("QPushButton { background-color: %s; }" % self._color)
         else:
             self.setStyleSheet("")
 
@@ -48,7 +49,11 @@ class QColorButton(QPushButton):
 
 
 class ColorSchemaWidget(SchemaWidgetMixin, QColorButton):
-    """Widget representation of a string with the 'color' format keyword."""
+    """A string with ``"format": "color"`` (or ``"ui:widget": "color"``) as colour picker button.
+
+    ``"colour"`` is accepted as alias.  The state is the colour name ``"#rrggbb"``;
+    a click opens the colour dialog, a right click clears the colour.
+    """
 
     def configure(self):
         self.colorChanged.connect(lambda: self.on_changed.emit(self.state))
