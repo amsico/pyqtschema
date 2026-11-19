@@ -64,3 +64,48 @@ def test_mark_does_not_apply_to_children(qtbot):
     QApplication.processEvents()
     assert inner.is_marked_invalid()
     assert not inner.widgets["v"].property("schemaInvalid")
+
+
+ARRAY_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "files": {"type": "array", "items": {"type": "string", "minLength": 2}},
+    }
+}
+
+
+def test_error_of_the_whole_array_marks_the_array(qtbot):
+    """an error with an empty path below the array (e.g. a wrong type) marks the array itself."""
+    widget = make(qtbot, ARRAY_SCHEMA, {"files": ["ab"]})
+    files = widget.widget.widgets["files"]
+    widget.widget.handle_error(("files",), Error())
+    assert files.is_marked_invalid()
+    assert files.toolTip() == Error.message
+
+
+def test_error_of_an_array_item_marks_the_item(qtbot):
+    widget = make(qtbot, ARRAY_SCHEMA, {"files": ["ab", "c"]})
+    files = widget.widget.widgets["files"]
+    widget.show_errors()
+    assert not files.is_marked_invalid()
+    assert files.rows[1].widget.is_marked_invalid()
+    assert not files.rows[0].widget.is_marked_invalid()
+
+
+def test_error_of_a_missing_array_row_is_ignored(qtbot):
+    widget = make(qtbot, ARRAY_SCHEMA, {"files": ["ab"]})
+    widget.widget.handle_error(("files", 5), Error())
+    assert not widget.widget.widgets["files"].is_marked_invalid()
+
+
+def test_error_of_the_whole_object_marks_the_object(qtbot):
+    """e.g. ``required``/``additionalProperties`` errors have the object's path."""
+    widget = make(qtbot, SCHEMA)
+    widget.widget.handle_error((), Error())
+    assert widget.widget.is_marked_invalid()
+
+
+def test_error_of_an_unknown_property_is_ignored(qtbot):
+    widget = make(qtbot, SCHEMA)
+    widget.widget.handle_error(("unknown",), Error())
+    assert not widget.widget.is_marked_invalid()

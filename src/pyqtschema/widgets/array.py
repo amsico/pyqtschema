@@ -78,8 +78,14 @@ class ArraySchemaWidget(SchemaWidgetMixin, QGroupBox):
         self.on_changed.emit(self.state)
 
     def handle_error(self, path: Tuple[str], err: Exception):
+        """Route ``err`` to the row at ``path[0]``; an empty path marks the whole array."""
+        if not path:
+            self._set_valid_state(err)
+            return
         index, *tail = path
-        self.rows[index].widget.handle_error(tail, err)
+        rows = self.rows
+        if isinstance(index, int) and 0 <= index < len(rows):
+            rows[index].widget.handle_error(tuple(tail), err)
 
     def configure(self):
         layout = QVBoxLayout()

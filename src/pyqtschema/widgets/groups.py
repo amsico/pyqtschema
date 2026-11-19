@@ -36,8 +36,14 @@ class ObjectSchemaWidget(SchemaWidgetMixin, QGroupBox):
             widget.state = value
 
     def handle_error(self, path: Tuple[str], err: Exception):
+        """Route ``err`` to the field at ``path[0]``; an empty path marks the whole object."""
+        if not path:
+            self._set_valid_state(err)
+            return
         name, *tail = path
-        self.widgets[name].handle_error(tail, err)
+        widget = self.widgets.get(name)
+        if widget is not None:
+            widget.handle_error(tuple(tail), err)
 
     def widget_on_changed(self, name: str, value):
         self.state[name] = value
